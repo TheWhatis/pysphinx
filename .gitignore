@@ -1,3 +1,9 @@
 main.py
 \#*
-\.\#*
+.\#*
+python-sphinx-doc.el.old
+/lib
+/bin
+lib*
+.pyvenv
+/__pycache__
