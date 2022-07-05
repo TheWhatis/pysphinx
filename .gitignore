@@ -1,4 +1,3 @@
-main.py
 \#*
 .\#*
 python-sphinx-doc.el.old
@@ -7,3 +6,4 @@ python-sphinx-doc.el.old
 lib*
 .pyvenv
 /__pycache__
+pyvenv.cfg
