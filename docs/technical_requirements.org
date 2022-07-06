@@ -28,14 +28,14 @@
       Description
 
    :param x: ``Any``
-       This is description argument;
+       .. This is description argument;
    :param y: ``float``
-       This is description argument;
+       .. This is description argument;
    :param j: ``str``.. "Default"
-       This is description argument;
+       .. This is description argument;
 
    :return: ``str``
-      This is description returns value
+      .. This is description returns value
 
    ,*Examples:*
    ::
@@ -110,14 +110,14 @@
 	   Description
 
 	:param x: ``Any`` .. "Default"
-	    This is description attribute;
+	    .. This is description attribute;
 	:param y: ``float``
-	    This is description attribute;
+	    .. This is description attribute;
 	:param j: ``str``
-	    This is description attribute;
+	    .. This is description attribute;
 
 	:return: ``MyClass``
-	   This is description returns value
+	   .. This is description returns value
 
 	,*Examples:*
 	::
@@ -156,14 +156,14 @@
 	  Description
 
        :param x: ``Any``
-	   This is description attribute;
+	   .. This is description attribute;
        :param y: ``float``
-	   This is description attribute;
+	   .. This is description attribute;
        :param j: ``str`` .. "Default"
-	   This is description attribute;
+	   .. This is description attribute;
 
        :return: ``float``
-	  This is description returns value
+	  .. This is description returns value
 
        ,*Examples:*
        ::
@@ -192,14 +192,14 @@
 	   Description
 
 	:param x: ``Any``
-	    This is description argument;
+	    .. This is description argument;
 	:param y: ``float``
-	    This is description argument;
+	    .. This is description argument;
 	:param j: ``str``.. "Default"
-	    This is description argument;
+	    .. This is description argument;
 
 	:return: ``str``
-	   This is description returns value
+	   .. This is description returns value
 
 	,*Examples:*
 	::
