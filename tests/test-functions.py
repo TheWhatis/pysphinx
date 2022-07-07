@@ -1,59 +1,36 @@
-def func():
+class MyClass:
+    """This is my description of class"""
+    y: float
+    j: str = "String"
+    k: dict[str, str] = {"str": "str"}
+    
+    def __init__(self, a = "str"):
+        """Initalize init"""
+        self.a = a
+
+    def myMethod(self, i: int, s: float = 3.33):
+        """Method Description"""
+        pass
+   
+    def function(x, y, j: float, k: int = 3.33):
+        """Method Description"""
+        pass
+ 
+    @staticmethod
+    def myStaticMethod(i: int, s: float = 3.33):
+        """Statid Method Description"""
+        pass
+        
+class MyClass2:
+    """This is my description of class"""
+    y: float
+    j: str = "String"
+    k: dict[str, str] = {"str": "str"}
+    
+    def __init__(self):
+        pass
+def function(x, y: float, j: str = "Default", k: dict[str, float] = {"str", 3.33}) -> list[list]:
+    """This is the description of function"""
     pass
-
-
-
-def arguments_function(f, s, t):
+def function2(x, y: float, j: str = "Default", k: dict[str, float] = {"str", 3.33}) -> list[list]:
     pass
-
-
-def expand_arguments_function(
-        f,
-        s,
-        t
-):
-    pass
-
-
-def expand_arguments_defaults(
-        f= "string",
-        s=1.2,
-        t={"str": 1.2}
-):
-    pass
-
-
-def typing_function() -> str:
-    pass
-
-def typing_arguments_function(f: str, s: float, t: dict):
-    pass
-
-
-def typing_arguments_function2(f: str, s: float, t: dict) -> dict[str, float]:
-    pass
-
-
-def expand_typing_arguments_function(
-        f: str,
-        s: float,
-        t: dict
-):
-    pass
-
-
-def expand_typing_arguments_function2(
-        f: str,
-        s: float,
-        t
-) -> str:
-    pass
-
-
-def expand_typing_arguments_function_defaults(
-        f: str = "default", #This is the description
-        s: dict = dict[str, float],
-        t: dict = str
-) -> str:
-    pass
-
