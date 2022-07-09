@@ -27,10 +27,13 @@
    .. Function multistring
       Description
 
+
    :param x: ``Any``
        .. This is description argument;
+
    :param y: ``float``
        .. This is description argument;
+
    :param j: ``str``.. "Default"
        .. This is description argument;
 
@@ -109,15 +112,20 @@
 	.. Class multistring
 	   Description
 
+
 	:param x: ``Any`` .. "Default"
 	    .. This is description attribute;
+
 	:param y: ``float``
 	    .. This is description attribute;
+
 	:param j: ``str``
 	    .. This is description attribute;
 
+
 	:return: ``MyClass``
 	   .. This is description returns value
+
 
 	,*Examples:*
 	::
@@ -135,7 +143,7 @@
 1. Заголовка
 2. Описания
 3. Списка аргументов и их значения
-4. Что возвращает 
+4. Что возвращает
 5. Примеров использования
 6. Опциональных блоков (*Дополнить*)
 
@@ -155,15 +163,20 @@
        .. Method Class multistring
 	  Description
 
+
        :param x: ``Any``
 	   .. This is description attribute;
+
        :param y: ``float``
 	   .. This is description attribute;
+
        :param j: ``str`` .. "Default"
 	   .. This is description attribute;
 
+
        :return: ``float``
 	  .. This is description returns value
+
 
        ,*Examples:*
        ::
@@ -191,15 +204,20 @@
 	.. Function multistring
 	   Description
 
+
 	:param x: ``Any``
 	    .. This is description argument;
+
 	:param y: ``float``
 	    .. This is description argument;
+
 	:param j: ``str``.. "Default"
 	    .. This is description argument;
 
+
 	:return: ``str``
 	   .. This is description returns value
+
 
 	,*Examples:*
 	::
@@ -207,7 +225,7 @@
 	"""
 	    pass
 #+end_src
-   
+
 И Завернем функцию в другую функцию (Обязательно см.код) ↓
 #+begin_src python
   """
@@ -252,6 +270,3 @@
    - [ ] Шаблон функций
    - [ ] Шаблон классов
    - [ ] Шаблон методов классов
-
-
-
