@@ -23,7 +23,7 @@ def _parse_construct(
     """
     Распарсить переданную конструкцию python;
     -----------------------------------------
-
+/home/whatis/projects/programming/elisp/python-sphinx-doc/pysphinx.py
     .. Получает на вход текст кода (или путь до файла с кодом) и
        возвращает разобранную конструкцию в виде ``["тип returns" [аргументы]]``
 
@@ -79,10 +79,10 @@ def _parse_construct(
     len_constructs = len(module.body)
     if not len_constructs:
         message = "Вы передали неверный \"текст кода/путь\" : \"{code}\""
-        return [message, [message]]
+        return [None, [message]]
     elif len_constructs > 1 and not name:
         message = "Код имеет больше одной функции - необходимо передать аргумент \"name\""
-        return [message, [message]]
+        return [None, [message]]
     elif len_constructs == 1:
         construct = module.body[0]
         construct_type = type(construct)
@@ -91,7 +91,7 @@ def _parse_construct(
         construct_types = (ast.FunctionDef, ast.ClassDef)
         if type(construct) not in construct_types:
             message = f"Construct имеет тип \"{construct_type}\", а должен быть " + str(construct_types)
-            return [message, [message]]
+            return [None, [message]]
     else:
         message = f"В коде конструкций с названием \"{name}\" больше одного - нужно передать аргументы \"line_start\" или \"line_end\""
 
@@ -105,7 +105,7 @@ def _parse_construct(
                             construct = el
                     else:
                         if construct:
-                            return [message, [message]]  # Error (если найдены дубли)
+                            return [None, [message]]  # Error (если найдены дубли)
                         construct = el
                 else:
                     for method in el.body:
@@ -116,7 +116,7 @@ def _parse_construct(
                                         construct = method
                                 else:
                                     if construct:
-                                        return [message, [message]]  # Error (если найдены дубли)
+                                        return [None, [message]]  # Error (если найдены дубли)
                                     construct = method
 
             elif isinstance(el, ast.FunctionDef):
@@ -126,12 +126,12 @@ def _parse_construct(
                             construct = el
                     else:
                         if construct:
-                            return [message, [message]]  # Error (если найдены дубли)
+                            return [None, [message]]  # Error (если найдены дубли)
                         construct = el
 
     if not construct:
         message = f"В коде не найдено конструкции с названием \"{name}\""
-        return [message, [message]]
+        return [None, [message]]
 
     returns = None
     description = None
@@ -213,10 +213,12 @@ def print_construct(code: Union[str, _path],
         err = str(error)
         printmessage = [err, [err]]
 
+    # print(code)
+
     print(
         json.dumps(printmessage, ensure_ascii=False)
     )
 
 
-if __name__ == "__main__":
-    print_construct("test-functions.py", "function", 15)
+# if __name__ == "__main__":
+    # print_construct("test-functions.py", "function", 15)

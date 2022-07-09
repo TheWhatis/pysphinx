@@ -36,93 +36,152 @@
 (require 'rx)
 (require 'python)
 
-(defun get-line-expression-numbers->list (start end)
+(defvar pyshpinx--python-boilerplate-file-path ; Путь до модуля python
+  (concat
+   (file-name-directory (or load-file-name buffer-file-name))
+   "pysphinx.py"))
+
+(defun pyshpinx--run-python-internal ()
+  "Запустить скрытно оболочку python."
+  (python-shell-make-comint
+   (python-shell-calculate-command)
+   (python-shell-get-process-name nil) nil)
+  (python-shell-send-string-no-output
+   (with-temp-buffer
+     (insert-file-contents pyshpinx--python-boilerplate-file-path)
+     (buffer-string)))
+  )
+
+(defun pysphinx-get-line-expression-numbers-from-buffer->list (start end)
   "Получить диапазон между первой регуляркой и последней.
 START - начало для поиска
 END - конец для поиска"
   (save-excursion
-    (let ((result nil))
-      (save-match-data
-	(when (search-backward-regexp start nil t)
-	  (push (line-number-at-pos) result)
-	  (when (search-forward-regexp end nil t)
-	    (push (line-number-at-pos) result)
-	    (when result
-	      (nreverse result))))))))
+    (let ((result)) ; Результат работы функции
+      ;; Ищем первое совпадение перед курсором
+      (when (search-backward-regexp start nil t)
+	(push (line-number-at-pos) result) ; Добавляем номер строки
+	;; Ищем второе совпадение после курсора (когда курсор был переведен функцией search-backward...)
+	(when (search-forward-regexp end nil t)
+	  (push (line-number-at-pos) result) ; Добавляем номер строки
+	  (when result
+	    (nreverse result))))))) ; Возвращаем результат
 
-(defun get-expression-string->str (start end)
-  "Получить строку по регуляркам.
-START - начало для поиска
-END - конец для поиска"
-  (save-excursion
-    (let ((result)
-	  (seq-list nil) ;; Перебираемый список
-	  (numb nil) ;; Номер строки
-	  (line nil) ;; Строка
-	  (list-numbers (get-line-expression-numbers->list start end))) ;; Диапазон
-      (save-match-data
-	(setq seq-list (number-sequence (nth 0 list-numbers) (nth 1 list-numbers))) ;; Создаем по диапазону список номеров строк
-	(when seq-list
-	  (setq numb (car seq-list))
-	  (with-no-warnings
-	    (goto-line numb))
-	  (setq line (thing-at-point 'line numb))
-	  (setq result line)
-	  (setq seq-list (cdr seq-list))
-	  (while seq-list
-	    (setq numb (car seq-list))
-	    (with-no-warnings
-	      (goto-line numb))
-	    (setq line (thing-at-point 'line numb))
-	    (setq result (concat result line))
-	    (setq seq-list (cdr seq-list)))
-	  (setq result (replace-regexp-in-string "\n\\|  " "" result nil t))))))) ;; Убираем перевод каретки и ненужные пробелы
-
-(defun get-construction-data->list (start end match)
+(defun pysphinx-get-construction-data-from-buffer->list (start end match &optional match-number)
   "Получить данные конструкции (имя, на какой линии находится).
 START - начало для поиска
 END - конец для поиска
-MATCH - регулярка для получения названия функции"
+MATCH - регулярка для получения названия функции      ↓↓↓↓↓↓↓↓↓↓↓↓
+MATCH-NUMBER - номер регулярки (функция (match-string match-number string)) (По Умолчанию 1)"
   (save-excursion
     (let ((name) ; Название кострукции
 	  (line-start) ; На какой линии начинается
 	  (pathfile) ; Путь до файла с конструкцией
-	  (temp)
-	  (result))
+	  (line) ; Строка
+	  (result)) ; Эта перменная будет возвращаться
+
+      ;; Если не был передан match-number - то по умолчанию 1
+      (when (not match-number)
+	(setq match-number 1))
+
       (save-match-data
-	(let ((list-numbers (get-line-expression-numbers->list start end))) ; Диапазон
+	(let ((list-numbers (pysphinx-get-line-expression-numbers-from-buffer->list start end))) ; Диапазон
 	  (setq line-start (nth 0 list-numbers)) ; Получаем line-start
 	  (setq pathfile (buffer-file-name)) ; Получаем pathfile
 
-	  (with-no-warnings
+	  (with-no-warnings ; Перемещаемся к строке, где находится функция
 	    (goto-line line-start))
 
-	  (setq temp (thing-at-point 'line line-start)) ; Получаем name
-	  (when (string-match match temp)
-	    (setq name (match-string 1 temp)))
+	  (setq line (thing-at-point 'line line-start)) ; Получаем эту строку
+
+	  (when (string-match match line)
+	    (setq name (match-string match-number line))) ; Получаем name
 
 	  (when name ; Если name не null, то возвращаем массив
-	    (push name result)
 	    (push line-start result)
+	    (push name result)
 	    (push pathfile result))
 	  )) ; Иначе возвращаем null
       result)))
 
-(defun get-result-construction-data->list (start end match)
-  "Вызвать функцию python и получить данные конструкции.
-START - начало для поиска
-END - конец для поиска
-MATCH - регулярка для получения названия функции"
+(defun pysphinx-get-construction-correct-data-from-buffer->list ()
+  "Получить список с данными ближайшей (от курсора свержу) конструкции из буфера."
+  (let ((result)
+	(constructions
+	 (list
+	  ;; DEF - обычная функция
+	  (pysphinx-get-construction-data-from-buffer->list "def "
+							    (rx
+							     (+ (in "a-zA-Z0-9_")) "(" (* any)
+							     (group ")" (* any) ":"))
+							    (rx
+							     "def "
+							     (group (* any))
+							     "("))
+	  ;; CLASS - обычный класс
+	  (pysphinx-get-construction-data-from-buffer->list "class "
+							    (rx
+							     (group (+ (in "a-zA-Z0-9_")))
+							     (or ":" "("))
+							    (rx
+							     "class "
+							     (group (+ (in "a-zA-Z0-9_")))
+							     (or ":" "("))))))
+    (let ((max-elem 0) ; Максимальный элемент сейчас (номер строки)
+	  (max-in-list 0) ; Максимальный элемент в списке (номер строки)
+	  (line-number)) ; Номер строки
+
+      ;; Получаем ближайшую конструкцию к курсору (ближайшую сверху)
+      (dolist (construction constructions)
+	(when construction
+	  (setq line-number (nth 2 construction))
+	  (when (> line-number max-in-list)
+	    (setq max-in-list line-number))))
+
+      ;; И собственно получаем её
+      (dolist (construction constructions)
+	(when construction
+	  (setq line-number (nth 2 construction))
+	  (setq max-elem (max max-elem line-number))
+	  (when (= max-in-list max-elem)
+	    (return construction)))))))
+
+(defun pysphinx-get-construction-correct-data->list ()
+  "Проверка."
   (save-excursion
-    ))
+    (let ((result) ; Результат работы функции здесь
+	  (json-result) ; Ответ json
+	  (construction (pysphinx-get-construction-correct-data-from-buffer->list))) ; Данные конструкции полученные в буфере
+
+      (when construction
+	(let ((json-array-type 'list)
+	      (filepath (nth 0 construction)) ; Путь до файла с кодом
+	      (name (nth 1 construction)) ; Имя конструкции
+	      (line-start (nth 2 construction))) ; Номер строки где она начинается
+
+	  (setq json-result
+		(json-read-from-string ; Форматируем json в список
+		 ;; Вызываем функцию, которая фозвращает данные конструкции
+		 ;; предварительно запускаем python через функцию "pysphinx--run-python-internal"
+		 (python-shell-send-string-no-output
+		  ;; Передаем параметры
+		  (format "print_construct(\"%s\", \"%s\", %d)"
+			  filepath
+			  name
+			  line-start))))
+
+	  ;; Если была передана конструкция, то возвращаем её
+	  (when json-result
+	    (setq result json-result))))
+      result)))
 
 (defun checking ()
   "Проверка работы функций."
   (interactive)
-  (message "%s" (get-construction-data->list "def " (rx
-						     "(" (* any)
-						     (group ")" (* any) ":"))
-					     (rx "def " (group (* any)) "("))))
+  (insert (format "%s" (pysphinx-get-construction-correct-data->list))))
 
 (global-set-key (kbd "C-c h") 'checking)
+
+(add-hook 'python-mode-hook 'pyshpinx--run-python-internal)
+
 ;;; pysphinx.el ends here
