@@ -86,22 +86,23 @@ MATCH-NUMBER - номер регулярки (функция (match-string match
 
       (save-match-data
 	(let ((list-numbers (pysphinx-get-line-expression-numbers-from-buffer->list start end))) ; Диапазон
-	  (setq line-start (nth 0 list-numbers)) ; Получаем line-start
-	  (setq pathfile (buffer-file-name)) ; Получаем pathfile
+	  (when list-numbers
+	    (setq line-start (nth 0 list-numbers)) ; Получаем line-start
+	    (setq pathfile (buffer-file-name)) ; Получаем pathfile
+	    
+	    (with-no-warnings ; Перемещаемся к строке, где находится функция
+	      (goto-line line-start))
 
-	  (with-no-warnings ; Перемещаемся к строке, где находится функция
-	    (goto-line line-start))
+	    (setq line (thing-at-point 'line line-start)) ; Получаем эту строку
 
-	  (setq line (thing-at-point 'line line-start)) ; Получаем эту строку
+	    (when (string-match match line)
+	      (setq name (match-string match-number line))) ; Получаем name
 
-	  (when (string-match match line)
-	    (setq name (match-string match-number line))) ; Получаем name
-
-	  (when name ; Если name не null, то возвращаем массив
-	    (push line-start result)
-	    (push name result)
-	    (push pathfile result))
-	  )) ; Иначе возвращаем null
+	    (when name ; Если name не null, то возвращаем массив
+	      (push line-start result)
+	      (push name result)
+	      (push pathfile result))
+	    result))) ; Иначе возвращаем null
       result)))
 
 (defun pysphinx-get-construction-correct-data-from-buffer->list ()
@@ -127,6 +128,7 @@ MATCH-NUMBER - номер регулярки (функция (match-string match
 							     "class "
 							     (group (+ (in "a-zA-Z0-9_")))
 							     (or ":" "("))))))
+
     (let ((max-elem 0) ; Максимальный элемент сейчас (номер строки)
 	  (max-in-list 0) ; Максимальный элемент в списке (номер строки)
 	  (line-number)) ; Номер строки
