@@ -151,7 +151,8 @@ MATCH-NUMBER - номер регулярки (функция (match-string match
   (save-excursion
     (let ((result) ; Результат работы функции здесь
 	  (json-result) ; Ответ json
-	  (construction (pysphinx-get-construction-correct-data-from-buffer->list))) ; Данные конструкции полученные в буфере
+	  ;; Данные конструкции, полученные в буфере
+	  (construction (pysphinx-get-construction-correct-data-from-buffer->list)))
 
       (when construction
 	(let ((json-array-type 'list)

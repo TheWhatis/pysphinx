@@ -23,12 +23,12 @@ def _parse_construct(
     """
     Распарсить переданную конструкцию python;
     -----------------------------------------
-/home/whatis/projects/programming/elisp/python-sphinx-doc/pysphinx.py
     .. Получает на вход текст кода (или путь до файла с кодом) и
-       возвращает разобранную конструкцию в виде ``["тип returns" [аргументы]]``
+       возвращает разобранную конструкцию в виде ``["Тип конструкции", ["тип returns", "описание", [аргументы...]]]``
 
        Но если была передана конструкция, в которой допущена ошибка, то
        вернет текст ошибки;
+
 
     :param code: ``Union[str, path]``
         .. Текст конструкции или путь до файла с ней;
@@ -42,14 +42,18 @@ def _parse_construct(
     :param line_end: ``int``
         .. Номер линии, на которой заканчивается конструкция
 
+
     :returns: ``list[Union[str, list]]``
         .. Возвращает список [
-                "Тип returns"/None,
-                "Description"/None
+                "Тип конструкции"/None
                 [
-                    ["name", "type", "default_value"],
-                    ["name", False, "default_value"],
-                    ["name", False, False],
+                    "Тип returns"/None,
+                    "Description"/None
+                    [
+                        ["name", "type", "default_value"],
+                        ["name", False, "default_value"],
+                        ["name", False, False],
+                    ]
                 ]
             ]
     """
@@ -71,7 +75,7 @@ def _parse_construct(
         else:
             module = ast.parse(code)
     except Exception as error:
-        return [str(error), [str(error)]]
+        return [None, [str(error)]]
 
     # Если код имеет больше одной конструкции и
     # не был передан аргумент "name", то возвращаем ошибку
@@ -129,13 +133,15 @@ def _parse_construct(
                             return [None, [message]]  # Error (если найдены дубли)
                         construct = el
 
+    # return construct
     if not construct:
         message = f"В коде не найдено конструкции с названием \"{name}\""
         return [None, [message]]
 
-    returns = None
-    description = None
-    arguments = []
+    type_construction = None  # Тип конструкции (функция, класс, метод)
+    returns = None  # Типизация функции (что она возвращает)
+    description = None  # Описание (если оно есть)
+    arguments = []  # Аргументы
 
     # Получаем аргументы/аттрибуты. Их:
     # Название
@@ -144,6 +150,8 @@ def _parse_construct(
     argument: Any  # Написал, чтобы не вылезала ошибка incopitable assigment...
     default_value: Any  # Написал, чтобы не вылезала ошибка incopitable assigment...
     if isinstance(construct, ast.FunctionDef):
+        # Тип конструкции (функция, класс, метод...)
+        type_construction = "function"
 
         # Типизация возвращения (если не None, то str название, иначе None)
         returns = ast.unparse(construct.returns) if construct.returns else construct.returns
@@ -168,6 +176,8 @@ def _parse_construct(
                 default_value
             ])
     elif isinstance(construct, ast.ClassDef):
+        # Тип конструкции (функция, класс, метод...)
+        type_construction = "class"
 
         # Типизация возвращения (если не None, то str название, иначе None)
         returns = construct.name
@@ -193,7 +203,12 @@ def _parse_construct(
                 ])
 
     return [
-        returns, description, arguments
+        type_construction,
+        [
+            returns,
+            description,
+            arguments
+        ]
     ]
 
 
@@ -213,12 +228,6 @@ def print_construct(code: Union[str, _path],
         err = str(error)
         printmessage = [err, [err]]
 
-    # print(code)
-
     print(
         json.dumps(printmessage, ensure_ascii=False)
     )
-
-
-# if __name__ == "__main__":
-    # print_construct("test-functions.py", "function", 15)

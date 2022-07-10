@@ -1,3 +1,4 @@
+
 class MyClass:
     """This is my description of class"""
     y: float
