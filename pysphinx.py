@@ -12,6 +12,76 @@ from typing import Union
 from typing import Any
 
 _path = str
+_ast_body = list
+
+
+def _parse_entry(body: _ast_body,
+                 name: str,
+                 line_start: int = 0,
+                 level: int = 1):
+    """
+    Функция для получения конструкции (рекурсивная);
+    ------------------------------------------------
+    .. Получает на вход тело файла/текст, где находиться конструкция и
+       возращает её вложенность и её саму;
+
+
+    :param body: ``Object Ast Body``
+        .. Тело, где находиться конструкция;
+
+    :param name: ``str``
+        .. Название конструцкии;
+
+    :param line_start: ``int`` - default: 0
+        .. Номер строки где начинается конструкция;
+
+    :param level: ``int`` - default: 0
+        .. Уровень её вложенности;
+
+
+    :returns; ``list/False``
+        .. Возвращает список [
+            Уровень вложенности/False,
+            Конструкцию/"текст ошибки"
+        ]/False
+
+    """
+
+    construction_types = {ast.FunctionDef, ast.ClassDef}
+    result = None
+
+    message = f"В коде конструкций с названием \"{name}\" больше одного - нужно передать аргументы \"line_start\" или \"line_end\""
+
+    for construction in body:
+        # Проверка всех конструкций внетри конструкции
+        if "body" in construction.__dict__:
+            if len(construction.body) > 1:
+                result = _parse_entry(construction.body, name, line_start, (level + 1))
+                if isinstance(result, list):
+                    # Если было по линии, то возвращаем
+                    if line_start and result[0]:
+                        return result
+
+                    # Если отработало исключение
+                    if not result[0]:
+                        return result
+
+        # Перебираем конструкции
+        if type(construction) in construction_types:
+            if construction.name == name:
+                if line_start:
+                    if line_start == construction.lineno:
+                        result = construction
+                    elif result:
+                        return [None, [message]]
+                elif result:
+                    return [None, [message]]
+                else:
+                    result = construction
+    if result:
+        return [level, result]
+    else:
+        return result
 
 
 def _parse_construct(
@@ -24,7 +94,7 @@ def _parse_construct(
     Распарсить переданную конструкцию python;
     -----------------------------------------
     .. Получает на вход текст кода (или путь до файла с кодом) и
-       возвращает разобранную конструкцию в виде ``["Тип конструкции", ["тип returns", "описание", [аргументы...]]]``
+       возвращает разобранную конструкцию в виде ``[Уровень вложенности, "Тип конструкции", ["тип returns", "описание", [аргументы...]]]``
 
        Но если была передана конструкция, в которой допущена ошибка, то
        вернет текст ошибки;
@@ -33,18 +103,19 @@ def _parse_construct(
     :param code: ``Union[str, path]``
         .. Текст конструкции или путь до файла с ней;
 
-    :param name: ``str``
+    :param name: ``str`` - default: ""
         .. Название конструкции;
 
-    :param line_start: ``int``
+    :param line_start: ``int`` - default: 0
         .. Номер линии, с которой начинается конструкция
 
-    :param line_end: ``int``
+    :param line_end: ``int`` - default: 0
         .. Номер линии, на которой заканчивается конструкция
 
 
     :returns: ``list[Union[str, list]]``
         .. Возвращает список [
+                Уровень вложенности,
                 "Тип конструкции"/None
                 [
                     "Тип returns"/None,
@@ -93,45 +164,18 @@ def _parse_construct(
 
         # Если некорректный тип конструкции
         construct_types = (ast.FunctionDef, ast.ClassDef)
-        if type(construct) not in construct_types:
+        if construct_type not in construct_types:
             message = f"Construct имеет тип \"{construct_type}\", а должен быть " + str(construct_types)
             return [None, [message]]
     else:
-        message = f"В коде конструкций с названием \"{name}\" больше одного - нужно передать аргументы \"line_start\" или \"line_end\""
+        construct = _parse_entry(module.body, name, line_start)
 
-        # Перебираем все конструкции, в
-        # поисках нужной
-        for el in module.body:
-            if isinstance(el, ast.ClassDef):
-                if el.name == name:
-                    if line_start:  # Если передан line_start
-                        if line_start == el.lineno:
-                            construct = el
-                    else:
-                        if construct:
-                            return [None, [message]]  # Error (если найдены дубли)
-                        construct = el
-                else:
-                    for method in el.body:
-                        if isinstance(method, ast.FunctionDef):
-                            if method.name == name:
-                                if line_start:  # Если передан line_start
-                                    if line_start == method.lineno:
-                                        construct = method
-                                else:
-                                    if construct:
-                                        return [None, [message]]  # Error (если найдены дубли)
-                                    construct = method
-
-            elif isinstance(el, ast.FunctionDef):
-                if el.name == name:
-                    if line_start:  # Если передан line_start
-                        if line_start == el.lineno:
-                            construct = el
-                    else:
-                        if construct:
-                            return [None, [message]]  # Error (если найдены дубли)
-                        construct = el
+        if isinstance(construct, list):
+            if construct[0]:
+                level = construct[0]
+                construct = construct[1]
+            else:
+                return construct
 
     # return construct
     if not construct:
@@ -203,6 +247,7 @@ def _parse_construct(
                 ])
 
     return [
+        level,
         type_construction,
         [
             returns,
