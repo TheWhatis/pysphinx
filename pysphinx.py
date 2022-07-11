@@ -159,7 +159,6 @@ def _parse_construct(
 
     # Если код имеет больше одной конструкции и
     # не был передан аргумент "name", то возвращаем ошибку
-    construct = None
     len_constructs = len(module.body)
     if not len_constructs:
         message = "Вы передали неверный \"текст кода/путь\" : \"{code}\""
@@ -167,24 +166,17 @@ def _parse_construct(
     elif len_constructs > 1 and not name:
         message = "Код имеет больше одной функции - необходимо передать аргумент \"name\""
         return [None, [message]]
-    elif len_constructs == 1:
-        construct = module.body[0]
-        construct_type = type(construct)
 
-        # Если некорректный тип конструкции
-        construct_types = (ast.FunctionDef, ast.ClassDef)
-        if construct_type not in construct_types:
-            message = f"Construct имеет тип \"{construct_type}\", а должен быть " + str(construct_types)
-            return [None, [message]]
-    else:
-        construct = _parse_entry(module.body, name, line_start)
+    # Рекурсивно перебирая все элементы получаем нужный
+    construct = _parse_entry(module.body, name, line_start)
 
-        if isinstance(construct, list):
-            if construct[0]:
-                level = construct[0]
-                construct = construct[1]
-            else:
-                return construct
+    # Проверяем что получили
+    if isinstance(construct, list):
+        if construct[0]:
+            level = construct[0]
+            construct = construct[1]
+        else:
+            return construct
 
     # return construct
     if not construct:
