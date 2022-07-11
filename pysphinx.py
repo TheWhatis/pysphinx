@@ -56,8 +56,13 @@ def _parse_entry(body: _ast_body,
         # Проверка всех конструкций внетри конструкции
         if "body" in construction.__dict__:
             if len(construction.body) > 1:
-                result = _parse_entry(construction.body, name, line_start, (level + 1))
-                if isinstance(result, list):
+                entry = _parse_entry(construction.body, name, line_start, (level + 1))
+                if isinstance(entry, list):
+                    if entry[0] and result:
+                        return [None, [message]]
+                    else:
+                        result = entry
+
                     # Если было по линии, то возвращаем
                     if line_start and result[0]:
                         return result
@@ -78,8 +83,12 @@ def _parse_entry(body: _ast_body,
                     return [None, [message]]
                 else:
                     result = construction
+
     if result:
-        return [level, result]
+        if isinstance(result, list):
+            return result
+        else:
+            return [level, result, result.col_offset]
     else:
         return result
 
