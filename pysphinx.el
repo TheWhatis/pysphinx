@@ -89,7 +89,7 @@ MATCH-NUMBER - номер регулярки (функция (match-string match
 	  (when list-numbers
 	    (setq line-start (nth 0 list-numbers)) ; Получаем line-start
 	    (setq pathfile (buffer-file-name)) ; Получаем pathfile
-	    
+
 	    (with-no-warnings ; Перемещаемся к строке, где находится функция
 	      (goto-line line-start))
 
@@ -106,15 +106,16 @@ MATCH-NUMBER - номер регулярки (функция (match-string match
       result)))
 
 (defun pysphinx-get-construction-correct-data-from-buffer->list ()
-  "Получить список с данными ближайшей (от курсора свержу) конструкции из буфера."
+  "Получить список с данными ближайшей конструкции из буфера.
+Получает список всех конструкций и возвращает ближайшею из них
+Ближайшую от курсора сверху"
   (let ((result)
 	(constructions
 	 (list
 	  ;; DEF - обычная функция
 	  (pysphinx-get-construction-data-from-buffer->list "def "
 							    (rx
-							     (+ (in "a-zA-Z0-9_")) "(" (* any)
-							     (group ")" (* any) ":"))
+							    ")" (* any) ":")
 							    (rx
 							     "def "
 							     (group (* any))
@@ -132,7 +133,7 @@ MATCH-NUMBER - номер регулярки (функция (match-string match
     (let ((max-elem 0) ; Максимальный элемент сейчас (номер строки)
 	  (max-in-list 0) ; Максимальный элемент в списке (номер строки)
 	  (line-number)) ; Номер строки
-
+      
       ;; Получаем ближайшую конструкцию к курсору (ближайшую сверху)
       (dolist (construction constructions)
 	(when construction
@@ -146,10 +147,11 @@ MATCH-NUMBER - номер регулярки (функция (match-string match
 	  (setq line-number (nth 2 construction))
 	  (setq max-elem (max max-elem line-number))
 	  (when (= max-in-list max-elem)
-	    (return construction)))))))
+	    (setq result construction))))
+      result)))
 
 (defun pysphinx-get-construction-correct-data->list ()
-  "Проверка."
+  "Получить данные правильной (ближайшей) конструкции."
   (save-excursion
     (let ((result) ; Результат работы функции здесь
 	  (json-result) ; Ответ json
@@ -177,6 +179,7 @@ MATCH-NUMBER - номер регулярки (функция (match-string match
 	  (when json-result
 	    (setq result json-result))))
       result)))
+
 
 (defun checking ()
   "Проверка работы функций."
