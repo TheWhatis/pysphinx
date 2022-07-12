@@ -41,17 +41,8 @@
 (require 'python)
 
 ;; Шаблоны
-(defvar pysphinx-template-header-levels)
-(setq pysphinx-template-header-levels (list))
-
-(let ((pysphinx-template-header-1 "=")
-      (pysphinx-template-header-2 "-")
-      (pysphinx-template-header-3 "~")
-      (pysphinx-template-header-4 "\""))
-  (push pysphinx-template-header-4 pysphinx-template-header-levels)
-  (push pysphinx-template-header-3 pysphinx-template-header-levels)
-  (push pysphinx-template-header-2 pysphinx-template-header-levels)
-  (push pysphinx-template-header-1 pysphinx-template-header-levels))
+(defvar pysphinx-template-header-levels
+  (list "=" "-" "~" "\""))
 
 (defvar pysphinx-template-header (concat "{header};"))
 
