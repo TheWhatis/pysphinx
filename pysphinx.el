@@ -41,8 +41,7 @@
 (require 'python)
 
 ;; Шаблоны
-(defvar pysphinx-template-header-levels
-  (list "=" "-" "~" "\""))
+(defvar pysphinx-template-header-levels "=-~\"")
 
 (defvar pysphinx-template-header (concat "{header};"))
 
@@ -94,7 +93,7 @@ LEVEL - уровень вложенности"
     (setq level 3))
   (concat
    (replace-regexp-in-string "{header}" header pysphinx-template-header) "\n"
-   (make-string (length header) (nth level pysphinx-template-header-levels))))
+   (make-string (length header) (aref pysphinx-template-header-levels level))))
 
 (defun pysphinx-generate-template-description->str ()
   "Создание описания для шаблона."
@@ -105,37 +104,20 @@ LEVEL - уровень вложенности"
 (defun pysphinx-generate-template-arguments->str (arguments)
   "Создание описание аргументов для шаблона.
 ARGUMENTS - аргументы конструкции"
-  (let ((result))
-    (dolist (arg arguments)
-      (let ((name (nth 0 arg)) ; Имя аргумента
-	    (type (nth 1 arg)) ; Тип аргумента
-	    (value (nth 2 arg)) ; Значение по умолчанию
-	    (string)) ; Строка с шаблоном для 1го аргумента
+  (mapconcat #'pysphinx-generate-template-argument->str arguments "\n\n"))
 
-	;; Шаблон по имени
-	(if result
-	    (setq string (concat "\n" "\n" pysphinx-template-argument-name))
-	  (setq string pysphinx-template-argument-name))
-	(setq string (replace-regexp-in-string "{argument_name}" name string))
-
-	;; Если у аргумента есть тип, то подставляем шаблон
-	(when type
-	  (setq type (replace-regexp-in-string
-		      "{argument_type}" type pysphinx-template-argument-type))
-	  (setq string (concat string type)))
-
-	;; Если есть значение по умолчанию, то подставляем шаблон
-	(when value
-	  (setq value (replace-regexp-in-string
-		       "{argument_value}" value pysphinx-template-argument-value))
-	  (setq string (concat string value)))
-
-	;; Добавляем описание
-	(setq string (concat string pysphinx-template-argument-description))
-
-	;; Добавляем к основному аргументу (это аргумент на выход)
-	(setq result (concat result string))))
-    result))
+(defun pysphinx-generate-template-argument->str (arg)
+  (pcase-let (((seq name type default-value) arg))
+    (concat
+     (replace-regexp-in-string
+      "{argument_name}" name pysphinx-template-argument-name)
+     (when type
+       (replace-regexp-in-string
+        "{argument_type}" type pysphinx-template-argument-type))
+     (when default-value
+       (replace-regexp-in-string
+        "{argument_value}" default-value pysphinx-template-argument-value))
+     pysphinx-template-argument-description)))
 
 (defun pysphinx-generate-template-returns->str (returns)
   "Создание описания аргумента который будет возвращать конструкция для шаблона.
