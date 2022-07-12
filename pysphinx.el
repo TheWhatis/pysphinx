@@ -251,7 +251,6 @@ MATCH-NUMBER - номер регулярки (функция (match-string match
 	  (line-last) ; На какой линии заканчивается объявление
 	  (filepath (format "~/.emacs.d/pysphinx/temp/%s" (buffer-name))) ; Путь до файла с конструкцией
 	  (line) ; Строка
-	  (temp)
 	  (result)) ; Эта перменная будет возвращаться
 
       ;; Если не был передан match-number - то по умолчанию 1
@@ -261,15 +260,13 @@ MATCH-NUMBER - номер регулярки (функция (match-string match
       (let ((list-numbers (pysphinx-get-line-expression-numbers-from-buffer->list start end))) ; Диапазон
 	(when list-numbers
 	  (setq line-start (nth 0 list-numbers)) ; Получаем line-start
-	  (setq line-last (nth 1 list-numbers))
-	  (setq temp (buffer-file-name))
+	  (setq line-last (nth 1 list-numbers)) ; Получаем line-end
 
-	  (setq filepath temp) ; Временное решение
+	  ;; Сохраняем весь текст буфера в отдельный файл
+	  (when (file-exists-p filepath)
+	    (delete-file filepath))
 	  
-	  ;; Сохраняем весь текст буфера в отдейльный файл
-	  ;; (set-visited-file-name filepath)
-	  (save-buffer)
-	  ;; (set-visited-file-name temp)
+	  (write-region nil nil filepath t)
 
 	  (with-no-warnings ; Перемещаемся к строке, где находится функция
 	    (goto-line line-start))
