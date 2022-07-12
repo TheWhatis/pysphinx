@@ -251,36 +251,40 @@ MATCH-NUMBER - номер регулярки (функция (match-string match
 	  (line-last) ; На какой линии заканчивается объявление
 	  (filepath (format "~/.emacs.d/pysphinx/temp/%s" (buffer-name))) ; Путь до файла с конструкцией
 	  (line) ; Строка
+	  (temp)
 	  (result)) ; Эта перменная будет возвращаться
 
       ;; Если не был передан match-number - то по умолчанию 1
       (when (not match-number)
 	(setq match-number 1))
 
-      (save-match-data
-	(let ((list-numbers (pysphinx-get-line-expression-numbers-from-buffer->list start end))) ; Диапазон
-	  (when list-numbers
-	    (setq line-start (nth 0 list-numbers)) ; Получаем line-start
-	    (setq line-last (nth 1 list-numbers))
+      (let ((list-numbers (pysphinx-get-line-expression-numbers-from-buffer->list start end))) ; Диапазон
+	(when list-numbers
+	  (setq line-start (nth 0 list-numbers)) ; Получаем line-start
+	  (setq line-last (nth 1 list-numbers))
+	  (setq temp (buffer-file-name))
 
-	    ;; Сохраняем весь текст буфера в отдейльный файл
-	    (set-visited-file-name filepath)
-	    (save-buffer)
+	  (setq filepath temp) ; Временное решение
+	  
+	  ;; Сохраняем весь текст буфера в отдейльный файл
+	  ;; (set-visited-file-name filepath)
+	  (save-buffer)
+	  ;; (set-visited-file-name temp)
 
-	    (with-no-warnings ; Перемещаемся к строке, где находится функция
-	      (goto-line line-start))
+	  (with-no-warnings ; Перемещаемся к строке, где находится функция
+	    (goto-line line-start))
 
-	    (setq line (thing-at-point 'line line-start)) ; Получаем эту строку
+	  (setq line (thing-at-point 'line line-start)) ; Получаем эту строку
 
-	    (when (string-match match line)
-	      (setq name (match-string match-number line))) ; Получаем name
+	  (when (string-match match line)
+	    (setq name (match-string match-number line))) ; Получаем name
 
-	    (when name ; Если name не null, то возвращаем массив
-	      (push line-last result)
-	      (push line-start result)
-	      (push name result)
-	      (push filepath result))
-	    result))) ; Иначе возвращаем null
+	  (when name ; Если name не null, то возвращаем массив
+	    (push line-last result)
+	    (push line-start result)
+	    (push name result)
+	    (push filepath result))
+	  result)) ; Иначе возвращаем null
       result)))
 
 (defun pysphinx-get-construction-correct-data-from-buffer->list ()
