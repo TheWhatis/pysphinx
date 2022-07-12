@@ -35,8 +35,13 @@ class MyClass2:
 
 def function(x, y: float, j: str = "Default", k: dict[str, float] = {"str": 3.33}) -> list[list]:
     """This is the description of function"""
-    pass
+    def entryfunction(x, y, j):
+        "This is the description of entry function"
+        def entryentryfunction(x, y, s):
+            "This is the description of entry-entry function"
+            def entryentryfunction(x, y, n):
+                pass
 
 
-def function2(x, y: float, j: str = "Default", k: dict[str, float] = {"str": 3.33}) -> list[list]:
+def function2(x, y: float, j: str = "Default", k: dict[str, float] = {"str": 3.33}) -> list[list]:    
     pass

@@ -88,7 +88,7 @@ def _parse_entry(body: _ast_body,
         if isinstance(result, list):
             return result
         else:
-            return [level, result, result.col_offset]
+            return [level, result]
     else:
         return result
 
@@ -149,7 +149,9 @@ def _parse_construct(
     try:
         # Если передан файл, то получаем содержимое и
         # передаем в ast.parse
-        if os.path.exists(code):
+
+        if os.path.exists(os.path.abspath(os.path.expanduser(code))):
+            code = os.path.abspath(os.path.expanduser(code))
             with open(code) as f:
                 module = ast.parse(f.read())
         else:
@@ -184,7 +186,7 @@ def _parse_construct(
         return [None, [message]]
 
     type_construction = None  # Тип конструкции (функция, класс, метод)
-    returns = None  # Типизация функции (что она возвращает)
+    returns = "None"  # Типизация функции (что она возвращает)
     description = None  # Описание (если оно есть)
     arguments = []  # Аргументы
 
@@ -199,7 +201,7 @@ def _parse_construct(
         type_construction = "function"
 
         # Типизация возвращения (если не None, то str название, иначе None)
-        returns = ast.unparse(construct.returns) if construct.returns else construct.returns
+        returns = ast.unparse(construct.returns) if construct.returns else "None"
 
         # Описание конструкции (если она есть)
         description = ast.unparse(construct.body[0]) if isinstance(construct.body[0], ast.Expr) else None
