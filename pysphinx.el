@@ -1,16 +1,16 @@
-;;; python-sphinx-doc.el --- Sphinx friendly docstrings for Python functions
-;; Copyright (c) 2013 <naikvin@gmail.com>
+;;; pysphinx.el --- Sphinx friendly docstrings for Python functions
+;; Copyright (c) 2022 <anton-gogo@mail.ru>
 
 ;; Author: Whatis <anton-gogo@gmail.com>
 ;; URL: https://github.com/Whatis/python-sphinx-doc.el
 ;; Version: 0.0.1
-;; Keywords: Sphinx, Python, Python-sphinx-doc
-;; Package-Requires: ...
+;; Keywords: Sphinx, Python, pysphinx
+;; Package-Requires: python, rx, python-mode, python3
 
 ;; This program is *not* a part of emacs and is provided under the MIT
 ;; License (MIT) <http://opensource.org/licenses/MIT>
 ;;
-;; Copyright (c) 2013 <anton-gogo@gmail.com>
+;; Copyright (c) 2022 <anton-gogo@gmail.com>
 ;;
 ;; Permission is hereby granted, free of charge, to any person
 ;; obtaining a copy of this software and associated documentation
@@ -265,7 +265,7 @@ MATCH-NUMBER - номер регулярки (функция (match-string match
 	  ;; Сохраняем весь текст буфера в отдельный файл
 	  (when (file-exists-p filepath)
 	    (delete-file filepath))
-	  
+
 	  (write-region nil nil filepath t)
 
 	  (with-no-warnings ; Перемещаемся к строке, где находится функция
@@ -537,7 +537,7 @@ DATA - данные конструкции"
       (setq twodes description))
 
     ;; Если описаие уже существует, то писать его не недо
-    (when (or (not description) (<= (length (split-string twodes "\n")) 1))
+    (when (or (not description) (<= (length (split-string twodes "\\\\n")) 2))
       ;; Обрабатываем аргументы
       (dolist (idex (number-sequence 1 python-indent-offset)) ; Табуляция
 	(setq indent (concat indent " ")))
@@ -626,10 +626,11 @@ DATA - данные конструкции"
 	    (goto-line line-number))
 
 	  ;; Если есть описание
-	  (when description
+	  (when (stringp description)
 	    ;; Если в описании меньше одной строки, то удаляем её
 	    (setq description (string-trim description))
-	    (when (= (length (split-string description "\n")) 1)
+	    (if (not (<= (length (split-string description "\\\\n")) 1))
+		(message "У этой конструкции уже имеется docstring")
 	      (save-excursion
 		(setq region
 		      (pysphinx-get-line-expression-numbers-from-buffer->list
@@ -642,7 +643,8 @@ DATA - данные конструкции"
 		  (dolist (number region)
 		    (with-no-warnings
 		      (goto-line number))
-		    (kill-whole-line))))))
+		    (kill-whole-line))
+		  ))))
 
 	  ;; Вставляем docstring
 	  (pysphinx-put-template-construction->str data)
