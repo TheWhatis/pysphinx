@@ -1,0 +1,10 @@
+#+TITLE: Инструкция по использованию
+#+AUTHOR: Whatis
+#+EMAIL: anton-gogo@mail.ru
+
+#+DESCRIPTION: Инструкция/документация по использованию пакета
+#+KEYWORDS: python, sphinx, docstring, python-mode, doc string, easypeasy, pysphinx
+#+LANGUAGE: ru
+* Пока пишу...
+Для проверки использования есть файлы в папке tests
+Комбинация клавиш для запуска <C-c h>
