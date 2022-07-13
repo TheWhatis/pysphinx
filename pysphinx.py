@@ -1,6 +1,6 @@
 """
 Вспомогательный модуль для скрипта;
-==================================
+===================================
 .. Содержит функции для парсинга конструкций языка python
 """
 
@@ -47,7 +47,7 @@ def _parse_entry(body: _ast_body,
 
     """
 
-    construction_types = {ast.FunctionDef, ast.ClassDef}
+    construction_types = (ast.FunctionDef, ast.ClassDef)
     result = None
 
     message = f"В коде конструкций с названием \"{name}\" больше одного - нужно передать аргументы \"line_start\" или \"line_end\""
