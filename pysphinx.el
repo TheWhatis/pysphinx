@@ -1,4 +1,4 @@
-;;; pysphinx.el --- Sphinx friendly docstrings for Python functions
+;;; pysphinx.el --- Sphinx friendly docstrings for Python functions -*- lexical-binding: t; -*-
 ;; Copyright (c) 2022 <anton-gogo@mail.ru>
 
 ;; Author: Whatis <anton-gogo@gmail.com>
@@ -32,24 +32,28 @@
 ;; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ;; SOFTWARE.
 
+;;; Commentary:
+
+;;; ...
+
 ;;; Code:
 (require 'rx)
 (require 'python)
 
 ;; Шаблоны
 (defvar pysphinx-template-header-levels)
-(setq pysphinx-template-header-levels (list))
 
-(let ((pysphinx-template-header-1 "=")
-      (pysphinx-template-header-2 "-")
-      (pysphinx-template-header-3 "~")
-      (pysphinx-template-header-4 "\""))
-  (push pysphinx-template-header-4 pysphinx-template-header-levels)
-  (push pysphinx-template-header-3 pysphinx-template-header-levels)
-  (push pysphinx-template-header-2 pysphinx-template-header-levels)
-  (push pysphinx-template-header-1 pysphinx-template-header-levels))
+(let ((header-1 "=")
+      (header-2 "-")
+      (header-3 "~")
+      (header-4 "'"))
+  (setq pysphinx-template-header-levels (list))
+  (push header-4 pysphinx-template-header-levels)
+  (push header-3 pysphinx-template-header-levels)
+  (push header-2 pysphinx-template-header-levels)
+  (push header-1 pysphinx-template-header-levels))
 
-(defvar pysphinx-template-header (concat "{header};"))
+(defvar pysphinx-template-header "{header};")
 
 (defvar pysphinx-template-description (concat ".. This is multistring" "\n"
 					      "   Description"))
@@ -92,22 +96,18 @@
 						"{examples}"))
 
 (defun pysphinx-generate-template-header->str (header level)
-  "Создания заголовка для шаблона.
+  "Создание заголовка для шаблона.
 HEADER - текст заголовка
 LEVEL - уровень вложенности"
-  (let ((result)
-	(char-level (nth level pysphinx-template-header-levels))
-	(chars))
-
-    (when (not char-level)
-      (setq char-level (nth 3 pysphinx-template-header-levels)))
-
-    (dolist (idex (number-sequence 0 (length header)))
-      (setq chars (concat chars char-level)))
-
-    (setq result (concat
-		  (replace-regexp-in-string "{header}" header pysphinx-template-header) "\n"
-		  chars))))
+  (unless (<= 0 level 3)
+    (setq level 3))
+  (let ((char (nth level pysphinx-template-header-levels)))
+    (when (stringp char)
+      (setq char (string-to-char char)))
+    (concat
+     (replace-regexp-in-string "{header}" header pysphinx-template-header) "\n"
+     (make-string (length header) char)))
+  )
 
 (defun pysphinx-generate-template-description->str ()
   "Создание описания для шаблона."
@@ -116,39 +116,25 @@ LEVEL - уровень вложенности"
     result))
 
 (defun pysphinx-generate-template-arguments->str (arguments)
-  "Создание описание аргументов для шаблона.
-ARGUMENTS - аргументы конструкции"
-  (let ((result))
-    (dolist (arg arguments)
-      (let ((name (nth 0 arg)) ; Имя аргумента
-	    (type (nth 1 arg)) ; Тип аргумента
-	    (value (nth 2 arg)) ; Значение по умолчанию
-	    (string)) ; Строка с шаблоном для 1го аргумента
+  "Создание описания аргументов для шаблона.
+ARGUMENTS - аргументы конструкций"
+  (mapconcat #'pysphinx-generate-template-argument->str arguments "\n\n"))
 
-	;; Шаблон по имени
-	(if result
-	    (setq string (concat "\n" "\n" pysphinx-template-argument-name))
-	  (setq string pysphinx-template-argument-name))
-	(setq string (replace-regexp-in-string "{argument_name}" name string))
+(defun pysphinx-generate-template-argument->str (arg)
+    "Создание описания аргумента для шаблона.
+ARG - аргумент конструкции"
+  (pcase-let (((seq name type default-value) arg))
+    (concat
+     (replace-regexp-in-string
+      "{argument_name}" name pysphinx-template-argument-name)
+     (when type
+       (replace-regexp-in-string
+	"{argument_type}" type pysphinx-template-argument-type))
+     (when default-value
+       (replace-regexp-in-string
+	"{argument_value}" default-value pysphinx-template-argument-value))
+     pysphinx-template-argument-description)))
 
-	;; Если у аргумента есть тип, то подставляем шаблон
-	(when type
-	  (setq type (replace-regexp-in-string
-		      "{argument_type}" type pysphinx-template-argument-type))
-	  (setq string (concat string type)))
-
-	;; Если есть значение по умолчанию, то подставляем шаблон
-	(when value
-	  (setq value (replace-regexp-in-string
-		       "{argument_value}" value pysphinx-template-argument-value))
-	  (setq string (concat string value)))
-
-	;; Добавляем описание
-	(setq string (concat string pysphinx-template-argument-description))
-
-	;; Добавляем к основному аргументу (это аргумент на выход)
-	(setq result (concat result string))))
-    result))
 
 (defun pysphinx-generate-template-returns->str (returns)
   "Создание описания аргумента который будет возвращать конструкция для шаблона.
