@@ -46,7 +46,7 @@
 (let ((header-1 "=")
       (header-2 "-")
       (header-3 "~")
-      (header-4 "'"))
+      (header-4 "^"))
   (setq pysphinx-template-header-levels (list))
   (push header-4 pysphinx-template-header-levels)
   (push header-3 pysphinx-template-header-levels)
@@ -65,7 +65,7 @@
 
 (defvar pysphinx-template-returns-name ":param returns:")
 (defvar pysphinx-template-returns-type "``{returns_type}``")
-(defvar pysphinx-template-returns-description "\n{indent}.. This is argument description")
+(defvar pysphinx-template-returns-description "\n{indent}.. This is returns description")
 
 (defvar pysphinx-template-examples (concat "*Examples:*" "\n"
 					   "::" "\n"
