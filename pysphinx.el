@@ -60,7 +60,7 @@
 
 (defvar pysphinx-template-argument-name ":param {argument_name}:")
 (defvar pysphinx-template-argument-type " ``{argument_type}``")
-(defvar pysphinx-template-argument-value " - {argument_value}")
+(defvar pysphinx-template-argument-value " - default: {argument_value}")
 (defvar pysphinx-template-argument-description "\n{indent}.. This is argument description")
 
 (defvar pysphinx-template-returns-name ":param returns:")
