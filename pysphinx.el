@@ -106,8 +106,8 @@ LEVEL - уровень вложенности"
     (when (stringp char)
       (setq char (string-to-char char)))
     (setq header (concat header "\n"
-			 (make-string (length header) char))))
-  header)
+			 (make-string (length header) char)))
+    header))
 
 (defun pysphinx-generate-template-description->str ()
   "Создание описания для шаблона."
@@ -388,7 +388,7 @@ RETURNS - текст типа возвращенных данных"
 	(examples pysphinx-template-examples))
     ;; Обрабатываем заголовок
     (when (not header)
-      (setq header "This is class header"))
+      (setq header "This is sdaf header"))
     (setq header (pysphinx-generate-template-header->str header level))
 
     ;; Обрабатываем аргументы
@@ -422,7 +422,7 @@ RETURNS - текст типа возвращенных данных"
     (when (not header)
       (setq header "This is method header"))
     (setq header (pysphinx-generate-template-header->str header level))
-
+    
     ;; Обрабатываем аргументы
     (if arguments
 	(setq arguments (pysphinx-generate-template-arguments->str arguments))
@@ -521,7 +521,7 @@ DATA - данные конструкции"
     (when description
       (setq description (string-trim description))
       (setq twodes description))
-
+    
     ;; Если описаие уже существует, то писать его не недо
     (when (or (not description) (<= (length (split-string twodes "\\\\n")) 2))
       ;; Обрабатываем аргументы

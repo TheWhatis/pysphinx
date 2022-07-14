@@ -85,7 +85,7 @@ def _parse_entry(body: _ast_body,
                         if module:
                             if isinstance(module, ast.ClassDef):
                                 type_construction = "method"
-                            result = construction
+                        result = construction
                     elif result:
                         return [None, [message]]
                 elif result:

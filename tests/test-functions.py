@@ -6,7 +6,6 @@ class MyClass:
     k: dict[str, str] = {"str": "str"}
 
     def __init__(self, a="str"):
-        """Initalize init"""
         self.a = a
 
     def myMethod(self, i: int, s: float = 3.33):
