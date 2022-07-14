@@ -11,11 +11,12 @@
 
   *(см docs/technical_requirements.org)*
 
-   =pysphinx= это *Emacs* minor mode для вставки документации (=docstring=) в
-   *Python* функции, методы, классы, данные и т.п. (в формате =reStructuredText (ReST)=)
+   =pysphinx= это Emacs minor mode для вставки документации =docstring= в
+   Python функции, методы, классы, данные и т.п. в формате *reStructuredText (ReST)*
 * Установка
-  Установка пока доступна только с github (в дальнейшем добавлю на *melpa*)
+  *Установка пока доступна только с github (в дальнейшем добавлю в melpa)*
 
+  Устанавливаем и добавляем директорию по следующему пути:
   + =git clone https://github.com/TheWhatis/pysphinx.git=
   + =cp -r pysphinx ~/.emacs.d/elpa/=
 ** Конфигурация
