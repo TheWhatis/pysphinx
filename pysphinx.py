@@ -10,6 +10,7 @@ import json
 
 from typing import Union
 from typing import Any
+from typing import Optional
 
 _path = str
 _ast_body = list
@@ -18,7 +19,8 @@ _ast_body = list
 def _parse_entry(body: _ast_body,
                  name: str,
                  line_start: int = 0,
-                 level: int = 1):
+                 level: int = 1,
+                 module: Optional[Union[ast.FunctionDef, ast.ClassDef]] = None):
     """
     Функция для получения конструкции (рекурсивная);
     ------------------------------------------------
@@ -38,6 +40,9 @@ def _parse_entry(body: _ast_body,
     :param level: ``int`` - default: 0
         .. Уровень её вложенности;
 
+    :param module: ``Optional[Union[ast.FunctionDef, ast.ClassDef]]`` - default: None
+       .. Родительский элемент (не обязательный параметр);
+
 
     :returns; ``list/False``
         .. Возвращает список [
@@ -49,6 +54,7 @@ def _parse_entry(body: _ast_body,
 
     construction_types = (ast.FunctionDef, ast.ClassDef)
     result = None
+    type_construction = None
 
     message = f"В коде конструкций с названием \"{name}\" больше одного - нужно передать аргументы \"line_start\" или \"line_end\""
 
@@ -56,7 +62,7 @@ def _parse_entry(body: _ast_body,
         # Проверка всех конструкций внетри конструкции
         if "body" in construction.__dict__:
             if len(construction.body) > 1:
-                entry = _parse_entry(construction.body, name, line_start, (level + 1))
+                entry = _parse_entry(construction.body, name, line_start, (level + 1), construction)
                 if isinstance(entry, list):
                     if entry[0] and result:
                         return [None, [message]]
@@ -76,19 +82,25 @@ def _parse_entry(body: _ast_body,
             if construction.name == name:
                 if line_start:
                     if line_start == construction.lineno:
-                        result = construction
+                        if module:
+                            if isinstance(module, ast.ClassDef):
+                                type_construction = "method"
+                            result = construction
                     elif result:
                         return [None, [message]]
                 elif result:
                     return [None, [message]]
                 else:
+                    if module:
+                        if isinstance(module, ast.ClassDef):
+                            type_construction = "method"                        
                     result = construction
 
     if result:
         if isinstance(result, list):
             return result
         else:
-            return [level, result]
+            return [level, result, type_construction]
     else:
         return result
 
@@ -176,6 +188,7 @@ def _parse_construct(
     if isinstance(construct, list):
         if construct[0]:
             level = construct[0]
+            type_construction = construct[2]  # Тип конструкции (функция, класс, метод)
             construct = construct[1]
         else:
             return construct
@@ -185,7 +198,6 @@ def _parse_construct(
         message = f"В коде не найдено конструкции с названием \"{name}\""
         return [None, [message]]
 
-    type_construction = None  # Тип конструкции (функция, класс, метод)
     returns = "None"  # Типизация функции (что она возвращает)
     description = None  # Описание (если оно есть)
     arguments = []  # Аргументы
@@ -198,7 +210,18 @@ def _parse_construct(
     default_value: Any  # Написал, чтобы не вылезала ошибка incopitable assigment...
     if isinstance(construct, ast.FunctionDef):
         # Тип конструкции (функция, класс, метод...)
-        type_construction = "function"
+        if construct.decorator_list:
+            declist = construct.decorator_list
+            if isinstance(declist[0], ast.Name):
+                if declist[0].id == "staticmethod":
+                    type_construction = "static-method"
+                elif declist[0].id == "classmethod":
+                    type_construction = "class-method"
+                else:
+                    type_construction = "decorated"
+        else:
+            if not type_construction:
+                type_construction = "asd"
 
         # Типизация возвращения (если не None, то str название, иначе None)
         returns = ast.unparse(construct.returns) if construct.returns else "None"

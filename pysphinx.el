@@ -388,7 +388,7 @@ RETURNS - текст типа возвращенных данных"
 	(examples pysphinx-template-examples))
     ;; Обрабатываем заголовок
     (when (not header)
-      (setq header "This is function header"))
+      (setq header "This is class header"))
     (setq header (pysphinx-generate-template-header->str header level))
 
     ;; Обрабатываем аргументы
@@ -420,7 +420,7 @@ RETURNS - текст типа возвращенных данных"
 	(examples pysphinx-template-examples))
     ;; Обрабатываем заголовок
     (when (not header)
-      (setq header "This is function header"))
+      (setq header "This is method header"))
     (setq header (pysphinx-generate-template-header->str header level))
 
     ;; Обрабатываем аргументы
@@ -452,7 +452,7 @@ RETURNS - текст типа возвращенных данных"
 	(examples pysphinx-template-examples))
     ;; Обрабатываем заголовок
     (when (not header)
-      (setq header "This is function header"))
+      (setq header "This is static method header"))
     (setq header (pysphinx-generate-template-header->str header level))
 
     ;; Обрабатываем аргументы
@@ -484,7 +484,7 @@ RETURNS - текст типа возвращенных данных"
 	(examples pysphinx-template-examples))
     ;; Обрабатываем заголовок
     (when (not header)
-      (setq header "This is function header"))
+      (setq header "This is class method header"))
     (setq header (pysphinx-generate-template-header->str header level))
 
     ;; Обрабатываем аргументы
@@ -528,10 +528,6 @@ DATA - данные конструкции"
       (dolist (idex (number-sequence 1 python-indent-offset)) ; Табуляция
 	(setq indent (concat indent " ")))
 
-      ;; Для обычных функций
-      (when (string-match "function" type)
-	(setq result (pysphinx-generate-template-function->str level description arguments returns)))
-
       ;; Для обычных методов
       (when (string-match "method" type)
 	(setq result (pysphinx-generate-template-method->str level description arguments returns)))
@@ -547,6 +543,10 @@ DATA - данные конструкции"
       ;; Для обычный классов
       (when (string-match "class" type)
 	(setq result (pysphinx-generate-template-class->str level description arguments returns)))
+      
+      ;; Для обычных функций или когда не была найдена конструкция
+      (when (or (string-match "function" type) (not result))
+	(setq result (pysphinx-generate-template-function->str level description arguments returns)))
 
       ;; Добавляем табуляцию
       (when result

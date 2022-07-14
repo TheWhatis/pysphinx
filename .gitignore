@@ -7,3 +7,4 @@ lib*
 .pyvenv
 /__pycache__
 pyvenv.cfg
+test.py
