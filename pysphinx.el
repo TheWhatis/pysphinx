@@ -101,13 +101,13 @@ HEADER - текст заголовка
 LEVEL - уровень вложенности"
   (unless (<= 0 level 3)
     (setq level 3))
-  (let ((char (nth level pysphinx-template-header-levels)))
+  (let ((char (nth level pysphinx-template-header-levels))
+	(header (replace-regexp-in-string "{header}" header pysphinx-template-header)))
     (when (stringp char)
       (setq char (string-to-char char)))
-    (concat
-     (replace-regexp-in-string "{header}" header pysphinx-template-header) "\n"
-     (make-string (length header) char)))
-  )
+    (setq header (concat header "\n"
+			 (make-string (length header) char))))
+  header)
 
 (defun pysphinx-generate-template-description->str ()
   "Создание описания для шаблона."
