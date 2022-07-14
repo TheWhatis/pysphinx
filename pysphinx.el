@@ -71,25 +71,25 @@
 					   "::" "\n"
 					   "{indent}.. first example:: function(\"asd\", 33) => asd33"))
 
-(defvar pysphinx-template-function (concat "{header}" "\n" "\n"
+(defvar pysphinx-template-function (concat "{header}" "\n"
 					   "{description}" "\n" "\n" "\n"
 					   "{arguments}" "\n" "\n" "\n"
 					   "{returns}" "\n" "\n" "\n"
 					   "{examples}"))
 
-(defvar pysphinx-template-class (concat "{header}" "\n" "\n"
+(defvar pysphinx-template-class (concat "{header}" "\n"
 					"{description}" "\n" "\n" "\n"
 					"{arguments}" "\n" "\n" "\n"
 					"{returns}" "\n" "\n" "\n"
 					"{examples}"))
 
-(defvar pysphinx-template-method (concat "{header}" "\n" "\n"
+(defvar pysphinx-template-method (concat "{header}" "\n"
 					 "{description}" "\n" "\n" "\n"
 					 "{arguments}" "\n" "\n" "\n"
 					 "{returns}" "\n" "\n" "\n"
 					 "{examples}"))
 
-(defvar pysphinx-template-static-method (concat "{header}" "\n" "\n"
+(defvar pysphinx-template-static-method (concat "{header}" "\n"
 						"{description}" "\n" "\n" "\n"
 						"{arguments}" "\n" "\n" "\n"
 						"{returns}" "\n" "\n" "\n"
