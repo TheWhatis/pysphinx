@@ -636,8 +636,19 @@ DATA - данные конструкции"
 	  (pysphinx-put-template-construction->str data)
 	  )))))
 
-(global-set-key (kbd "C-c h") 'pysphinx-put-docstring)
+(defvar pysphinx-minor-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c h") 'pysphinx-put-docstring)
+    map)
+  "Комбинации клавиш для 'pysphinx-minor-mode'.")
 
-(add-hook 'python-mode-hook 'pysphinx--run-python-internal)
+(define-minor-mode pysphinx-minor-mode
+  "Sphinx генератор документаций (docstring) для кода Python"
+  :init-value nil
+  :lighter " Sphinx"
+  :keymap pysphinx-minor-mode-map
+  (when pysphinx-minor-mode ; ON
+    (pysphinx--run-python-internal)))
 
+(provide 'pysphinx)
 ;;; pysphinx.el ends here
