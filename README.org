@@ -31,4 +31,4 @@
 * Использование
   Откройте Python код, переместите курсор под функцию/метод/класс и нажмите комбинацию клавиш =C-c h= (см. видео ниже)
 ** Как выглядит работа Pysphinx
-   [[https://raw.githubusercontent.com/TheWhatis/pysphinx/news/support/demo.gif]]
+   [[https://raw.githubusercontent.com/TheWhatis/pysphinx/master/support/demo.gif]]
