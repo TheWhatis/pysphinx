@@ -249,6 +249,10 @@ def _parse_construct(
                     default_value
                 ])
 
+    # Убираем ковычки
+    if description:
+        description = description[:-1][1:]
+
     return [
         level,
         type_construction,
