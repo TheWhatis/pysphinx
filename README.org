@@ -20,7 +20,7 @@
 ** Конфигурация
    Добавить следующие строки в свой *.emacs* конфиг
    #+begin_src elisp
-     (add-to-list "/abspath/to/home/.emacs.d/elpa/pysphinx/pysphinx.el") ; Абсолютный путь до пакета
+     (add-to-list "/abspath/to/home/.emacs.d/elpa/pysphinx/") ; Абсолютный путь до пакета
      (require 'pysphinx) ; Подключаем `pysphinx'
      (add-hook 'python-mode-hook 'pysphinx-minor-mode) ; Примантируем к `python-mode-hook' `pysphinx-minor-mode'
    #+end_src
