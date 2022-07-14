@@ -1,11 +1,30 @@
-#+TITLE: Инструкция по использованию
+#+TITLE: Pysphinx
 #+AUTHOR: Whatis
 #+EMAIL: anton-gogo@mail.ru
 
 #+DESCRIPTION: Инструкция/документация по использованию пакета
 #+KEYWORDS: python, sphinx, docstring, python-mode, doc string, easypeasy, pysphinx
 #+LANGUAGE: ru
-* Пока пишу...
-Для проверки использования есть файлы в папке tests
+* Что это такое?
+  *Пока этот проект находится в бета-тестировании (многое не добавлено и не исправлено)
+  (см docs/technical_requirements.org)*
 
-Комбинация клавиш для запуска <C-c h>
+   =pysphinx= это *Emacs* minor mode для вставки документации (=docstring=) в
+   *Python* функции, методы, классы, данные и т.п. (в формате =reStructuredText (ReST)=)
+* Установка
+  Установка пока доступна только с github (в дальнейшем добавлю на *melpa*)
+
+  + =git clone https://github.com/TheWhatis/pysphinx.git=
+  + =cp -r pysphinx ~/.emacs.d/elpa/=
+** Конфигурация
+   Добавить следующие строки в свой *.emacs* конфиг
+   #+begin_src elisp
+     (add-to-list "/abspath/to/home/.emacs.d/elpa/pysphinx/pysphinx.el") ; Абсолютный путь до пакета
+     (require 'pysphinx) ; Подключаем `pysphinx'
+     (add-hook 'python-mode-hook 'pysphinx-minor-mode) ; Примантируем к `python-mode-hook' `pysphinx-minor-mode'
+   #+end_src
+   Когда вы это сделаете, у вас появится комбинация клавиш =C-c h= - к ней привязана интерактивная функция =pysphinx-put-docstring=.
+
+  С помощью неё вы сможете добавлять к вашим конструкциям шаблоны =docstring=
+* Использование
+  *Пока пишу*
