@@ -388,7 +388,7 @@ RETURNS - текст типа возвращенных данных"
 	(examples pysphinx-template-examples))
     ;; Обрабатываем заголовок
     (when (not header)
-      (setq header "This is sdaf header"))
+      (setq header "This is class header"))
     (setq header (pysphinx-generate-template-header->str header level))
 
     ;; Обрабатываем аргументы
