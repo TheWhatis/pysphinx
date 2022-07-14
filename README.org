@@ -29,3 +29,4 @@
   С помощью неё вы сможете добавлять к вашим конструкциям шаблоны =docstring=
 * Использование
   *Пока пишу...*
+  [[[[https://raw.githubusercontent.com/TheWhatis/pysphinx/master/support/demo.gif]]]]
