@@ -5,6 +5,7 @@
 #+DESCRIPTION: Инструкция/документация по использованию пакета
 #+KEYWORDS: python, sphinx, docstring, python-mode, doc string, easypeasy, pysphinx
 #+LANGUAGE: ru
+#+STARTUP: inlineimages
 * Что это такое?
   *Пока этот проект находится в бета-тестировании (многое не добавлено и не исправлено)*
 
@@ -28,4 +29,4 @@
 
   С помощью неё вы сможете добавлять к вашим конструкциям шаблоны =docstring=
 * Использование
-  [[[[https://raw.githubusercontent.com/TheWhatis/pysphinx/news/support/demo.gif]]]]
+  [[https://raw.githubusercontent.com/TheWhatis/pysphinx/news/support/demo.gif]]
