@@ -6,8 +6,9 @@
 #+KEYWORDS: python, sphinx, docstring, python-mode, doc string, easypeasy, pysphinx
 #+LANGUAGE: ru
 * Что это такое?
-  *Пока этот проект находится в бета-тестировании (многое не добавлено и не исправлено)
-  (см docs/technical_requirements.org)*
+  *Пока этот проект находится в бета-тестировании (многое не добавлено и не исправлено)*
+
+  *(см docs/technical_requirements.org)*
 
    =pysphinx= это *Emacs* minor mode для вставки документации (=docstring=) в
    *Python* функции, методы, классы, данные и т.п. (в формате =reStructuredText (ReST)=)
