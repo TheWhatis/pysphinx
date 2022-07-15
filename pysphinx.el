@@ -55,45 +55,93 @@
 
 (defvar pysphinx-template-header "{header};")
 
-(defvar pysphinx-template-description (concat ".. This is multistring" "\n"
-					      "   Description"))
+(defvar pysphinx-template-description
+  (concat ".. This is multistring" "\n"
+	  "   Description"))
 
-(defvar pysphinx-template-argument-name ":param {argument_name}:")
-(defvar pysphinx-template-argument-type " ``{argument_type}``")
-(defvar pysphinx-template-argument-value " - default: {argument_value}")
-(defvar pysphinx-template-argument-description "\n{indent}.. This is argument description")
+(defvar pysphinx-template-argument-name
+  ":param {argument_name}:")
+(defvar pysphinx-template-argument-type
+  " ``{argument_type}``")
+(defvar pysphinx-template-argument-value
+  " - default: {argument_value}")
+(defvar pysphinx-template-argument-description
+  "\n{indent}.. This is argument description")
 
-(defvar pysphinx-template-returns-name ":param returns:")
-(defvar pysphinx-template-returns-type "``{returns_type}``")
-(defvar pysphinx-template-returns-description "\n{indent}.. This is returns description")
+(defvar pysphinx-template-returns-name
+  ":param returns:")
+(defvar pysphinx-template-returns-type
+  "``{returns_type}``")
+(defvar pysphinx-template-returns-description
+  "\n{indent}.. This is returns description")
 
-(defvar pysphinx-template-examples (concat "*Examples:*" "\n"
-					   "::" "\n"
-					   "{indent}.. first example:: function(\"asd\", 33) => asd33"))
+(defvar pysphinx-template-examples
+  (concat "*Examples:*" "\n"
+	  "::" "\n"
+	  "{indent}.. first example:: function(\"asd\", 33) => asd33"))
 
-(defvar pysphinx-template-function (concat "{header}" "\n"
-					   "{description}" "\n" "\n" "\n"
-					   "{arguments}" "\n" "\n" "\n"
-					   "{returns}" "\n" "\n" "\n"
-					   "{examples}"))
+(defvar pysphinx-template-function
+  (concat "{header}" "\n"
+	  "{description}" "\n" "\n" "\n"
+	  "{arguments}" "\n" "\n" "\n"
+	  "{returns}" "\n" "\n" "\n"
+	  "{examples}"))
 
-(defvar pysphinx-template-class (concat "{header}" "\n"
-					"{description}" "\n" "\n" "\n"
-					"{arguments}" "\n" "\n" "\n"
-					"{returns}" "\n" "\n" "\n"
-					"{examples}"))
+(defvar pysphinx-template-decorated-function
+  (concat "{header}" "\n"
+	  "{description}" "\n" "\n" "\n"
+	  "{arguments}" "\n" "\n" "\n"
+	  "{returns}" "\n" "\n" "\n"
+	  "{examples}"))
 
-(defvar pysphinx-template-method (concat "{header}" "\n"
-					 "{description}" "\n" "\n" "\n"
-					 "{arguments}" "\n" "\n" "\n"
-					 "{returns}" "\n" "\n" "\n"
-					 "{examples}"))
+(defvar pysphinx-template-class
+  (concat "{header}" "\n"
+	  "{description}" "\n" "\n" "\n"
+	  "{arguments}" "\n" "\n" "\n"
+	  "{returns}" "\n" "\n" "\n"
+	  "{examples}"))
 
-(defvar pysphinx-template-static-method (concat "{header}" "\n"
-						"{description}" "\n" "\n" "\n"
-						"{arguments}" "\n" "\n" "\n"
-						"{returns}" "\n" "\n" "\n"
-						"{examples}"))
+(defvar pysphinx-template-abstract-class
+  (concat "{header}" "\n"
+	  "{description}" "\n" "\n" "\n"
+	  "{arguments}" "\n" "\n" "\n"
+	  "{returns}" "\n" "\n" "\n"
+	  "{examples}"))
+
+(defvar pysphinx-template-method
+  (concat "{header}" "\n"
+	  "{description}" "\n" "\n" "\n"
+	  "{arguments}" "\n" "\n" "\n"
+	  "{returns}" "\n" "\n" "\n"
+	  "{examples}"))
+
+(defvar pysphinx-template-static-method
+  (concat "{header}" "\n"
+	  "{description}" "\n" "\n" "\n"
+	  "{arguments}" "\n" "\n" "\n"
+	  "{returns}" "\n" "\n" "\n"
+	  "{examples}"))
+
+(defvar pysphinx-template-class-method
+  (concat "{header}" "\n"
+	  "{description}" "\n" "\n" "\n"
+	  "{arguments}" "\n" "\n" "\n"
+	  "{returns}" "\n" "\n" "\n"
+	  "{examples}"))
+
+(defvar pysphinx-template-abstract-method
+  (concat "{header}" "\n"
+	  "{description}" "\n" "\n" "\n"
+	  "{arguments}" "\n" "\n" "\n"
+	  "{returns}" "\n" "\n" "\n"
+	  "{examples}"))
+
+(defvar pysphinx-template-decorated-method
+  (concat "{header}" "\n"
+	  "{description}" "\n" "\n" "\n"
+	  "{arguments}" "\n" "\n" "\n"
+	  "{returns}" "\n" "\n" "\n"
+	  "{examples}"))
 
 (defun pysphinx-generate-template-header->str (header level)
   "Создание заголовка для шаблона.
@@ -377,18 +425,82 @@ RETURNS - текст типа возвращенных данных"
     (setq result (replace-regexp-in-string "{examples}" examples result))
     result))
 
+(defun pysphinx-generate-template-decorated-function->str (level header arguments returns)
+  "Генерация шаблона декорированной функции (@decorator).
+LEVEL - уровень вложенности
+HEADER - текст заголовка либо nil
+ARGUMENTS - список аргументов либо nil
+RETURNS - текст типа возвращенных данных"
+  (let ((result pysphinx-template-decorated-function)
+	(description pysphinx-template-description)
+	(examples pysphinx-template-examples))
+    ;; Обрабатываем заголовок
+    (when (not header)
+      (setq header "This is decorated function header"))
+    (setq header (pysphinx-generate-template-header->str header level))
+
+    ;; Обрабатываем аргументы
+    (if arguments
+	(setq arguments (pysphinx-generate-template-arguments->str arguments))
+
+      (setq arguments ""))
+    ;; Обрабатываем returns
+    (when (not returns)
+      (setq returns "None"))
+    (setq returns (pysphinx-generate-template-returns->str returns))
+
+    ;; Собстенно создание шаблона
+    (setq result (replace-regexp-in-string "{header}" header result))
+    (setq result (replace-regexp-in-string "{description}" description result))
+    (setq result (replace-regexp-in-string "{arguments}" arguments result))
+    (setq result (replace-regexp-in-string "{returns}" returns result))
+    (setq result (replace-regexp-in-string "{examples}" examples result))
+    result))
+
 (defun pysphinx-generate-template-class->str (level header arguments returns)
   "Генерация шаблона класса.
 LEVEL - уровень вложенности
 HEADER - текст заголовка либо nil
 ARGUMENTS - список аргументов либо nil
 RETURNS - текст типа возвращенных данных"
-  (let ((result pysphinx-template-function)
+  (let ((result pysphinx-template-class)
 	(description pysphinx-template-description)
 	(examples pysphinx-template-examples))
     ;; Обрабатываем заголовок
     (when (not header)
       (setq header "This is class header"))
+    (setq header (pysphinx-generate-template-header->str header level))
+
+    ;; Обрабатываем аргументы
+    (if arguments
+	(setq arguments (pysphinx-generate-template-arguments->str arguments))
+
+      (setq arguments ""))
+    ;; Обрабатываем returns
+    (when (not returns)
+      (setq returns "None"))
+    (setq returns (pysphinx-generate-template-returns->str returns))
+
+    ;; Собстенно создание шаблона
+    (setq result (replace-regexp-in-string "{header}" header result))
+    (setq result (replace-regexp-in-string "{description}" description result))
+    (setq result (replace-regexp-in-string "{arguments}" arguments result))
+    (setq result (replace-regexp-in-string "{returns}" returns result))
+    (setq result (replace-regexp-in-string "{examples}" examples result))
+    result))
+
+(defun pysphinx-generate-template-abstract-class->str (level header arguments returns)
+  "Генерация шаблона абстрактного класса класса.
+LEVEL - уровень вложенности
+HEADER - текст заголовка либо nil
+ARGUMENTS - список аргументов либо nil
+RETURNS - текст типа возвращенных данных"
+  (let ((result pysphinx-template-abstract-class)
+	(description pysphinx-template-description)
+	(examples pysphinx-template-examples))
+    ;; Обрабатываем заголовок
+    (when (not header)
+      (setq header "This is abstract class header"))
     (setq header (pysphinx-generate-template-header->str header level))
 
     ;; Обрабатываем аргументы
@@ -415,14 +527,14 @@ LEVEL - уровень вложенности
 HEADER - текст заголовка либо nil
 ARGUMENTS - список аргументов либо nil
 RETURNS - текст типа возвращенных данных"
-  (let ((result pysphinx-template-function)
+  (let ((result pysphinx-template-method)
 	(description pysphinx-template-description)
 	(examples pysphinx-template-examples))
     ;; Обрабатываем заголовок
     (when (not header)
       (setq header "This is method header"))
     (setq header (pysphinx-generate-template-header->str header level))
-    
+
     ;; Обрабатываем аргументы
     (if arguments
 	(setq arguments (pysphinx-generate-template-arguments->str arguments))
@@ -447,7 +559,7 @@ LEVEL - уровень вложенности
 HEADER - текст заголовка либо nil
 ARGUMENTS - список аргументов либо nil
 RETURNS - текст типа возвращенных данных"
-  (let ((result pysphinx-template-function)
+  (let ((result pysphinx-template-static-method)
 	(description pysphinx-template-description)
 	(examples pysphinx-template-examples))
     ;; Обрабатываем заголовок
@@ -479,12 +591,76 @@ LEVEL - уровень вложенности
 HEADER - текст заголовка либо nil
 ARGUMENTS - список аргументов либо nil
 RETURNS - текст типа возвращенных данных"
-  (let ((result pysphinx-template-function)
+  (let ((result pysphinx-template-class-method)
 	(description pysphinx-template-description)
 	(examples pysphinx-template-examples))
     ;; Обрабатываем заголовок
     (when (not header)
       (setq header "This is class method header"))
+    (setq header (pysphinx-generate-template-header->str header level))
+
+    ;; Обрабатываем аргументы
+    (if arguments
+	(setq arguments (pysphinx-generate-template-arguments->str arguments))
+
+      (setq arguments ""))
+    ;; Обрабатываем returns
+    (when (not returns)
+      (setq returns "None"))
+    (setq returns (pysphinx-generate-template-returns->str returns))
+
+    ;; Собстенно создание шаблона
+    (setq result (replace-regexp-in-string "{header}" header result))
+    (setq result (replace-regexp-in-string "{description}" description result))
+    (setq result (replace-regexp-in-string "{arguments}" arguments result))
+    (setq result (replace-regexp-in-string "{returns}" returns result))
+    (setq result (replace-regexp-in-string "{examples}" examples result))
+    result))
+
+(defun pysphinx-generate-template-abstract-method->str (level header arguments returns)
+  "Генерация шаблона абстрактного метода (@abstractmethod).
+LEVEL - уровень вложенности
+HEADER - текст заголовка либо nil
+ARGUMENTS - список аргументов либо nil
+RETURNS - текст типа возвращенных данных"
+  (let ((result pysphinx-template-abstract-method)
+	(description pysphinx-template-description)
+	(examples pysphinx-template-examples))
+    ;; Обрабатываем заголовок
+    (when (not header)
+      (setq header "This is abstract method header"))
+    (setq header (pysphinx-generate-template-header->str header level))
+
+    ;; Обрабатываем аргументы
+    (if arguments
+	(setq arguments (pysphinx-generate-template-arguments->str arguments))
+
+      (setq arguments ""))
+    ;; Обрабатываем returns
+    (when (not returns)
+      (setq returns "None"))
+    (setq returns (pysphinx-generate-template-returns->str returns))
+
+    ;; Собстенно создание шаблона
+    (setq result (replace-regexp-in-string "{header}" header result))
+    (setq result (replace-regexp-in-string "{description}" description result))
+    (setq result (replace-regexp-in-string "{arguments}" arguments result))
+    (setq result (replace-regexp-in-string "{returns}" returns result))
+    (setq result (replace-regexp-in-string "{examples}" examples result))
+    result))
+
+(defun pysphinx-generate-template-decorated-method->str (level header arguments returns)
+  "Генерация шаблона декорированного метода (@decorator).
+LEVEL - уровень вложенности
+HEADER - текст заголовка либо nil
+ARGUMENTS - список аргументов либо nil
+RETURNS - текст типа возвращенных данных"
+  (let ((result pysphinx-template-decorated-method)
+	(description pysphinx-template-description)
+	(examples pysphinx-template-examples))
+    ;; Обрабатываем заголовок
+    (when (not header)
+      (setq header "This is decorated method header"))
     (setq header (pysphinx-generate-template-header->str header level))
 
     ;; Обрабатываем аргументы
@@ -521,12 +697,28 @@ DATA - данные конструкции"
     (when description
       (setq description (string-trim description))
       (setq twodes description))
-    
+
     ;; Если описаие уже существует, то писать его не недо
     (when (or (not description) (<= (length (split-string twodes "\\\\n")) 2))
       ;; Обрабатываем аргументы
       (dolist (idex (number-sequence 1 python-indent-offset)) ; Табуляция
 	(setq indent (concat indent " ")))
+
+      ;; Для обычных функций
+      (when (string-match "function" type)
+	(setq result (pysphinx-generate-template-function->str level description arguments returns)))
+
+      ;; Для декорированных функций (@decorator)
+      (when (string-match "decorated-function" type)
+	(setq result (pysphinx-generate-template-decorated-function->str level description arguments returns)))
+
+      ;; Для обычный классов
+      (when (string-match "class" type)
+	(setq result (pysphinx-generate-template-class->str level description arguments returns)))
+
+      ;; Для абстрактных классов
+      (when (string-match "abstract-class" type)
+	(setq result (pysphinx-generate-template-abstract-class->str level description arguments returns)))
 
       ;; Для обычных методов
       (when (string-match "method" type)
@@ -540,12 +732,16 @@ DATA - данные конструкции"
       (when (string-match "class-method" type)
 	(setq result (pysphinx-generate-template-class-method->str level description arguments returns)))
 
-      ;; Для обычный классов
-      (when (string-match "class" type)
-	(setq result (pysphinx-generate-template-class->str level description arguments returns)))
+      ;; Для абстрактных методов (@abstractmethod)
+      (when (string-match "abstract-method" type)
+	(setq result (pysphinx-generate-template-abstract-method->str level description arguments returns)))
       
-      ;; Для обычных функций или когда не была найдена конструкция
-      (when (or (string-match "function" type) (not result))
+      ;; Для декорированных методов (@decorator)
+      (when (string-match "decorated-method" type)
+	(setq result (pysphinx-generate-template-decorated-method->str level description arguments returns)))
+
+      ;; Для когда не была определена конструкция
+      (when (not result)
 	(setq result (pysphinx-generate-template-function->str level description arguments returns)))
 
       ;; Добавляем табуляцию

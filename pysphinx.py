@@ -93,7 +93,7 @@ def _parse_entry(body: _ast_body,
                 else:
                     if module:
                         if isinstance(module, ast.ClassDef):
-                            type_construction = "method"                        
+                            type_construction = "method"
                     result = construction
 
     if result:
@@ -217,11 +217,15 @@ def _parse_construct(
                     type_construction = "static-method"
                 elif declist[0].id == "classmethod":
                     type_construction = "class-method"
+                elif declist[0].id == "abstractmethod":
+                    type_construction = "abstract-method"
+                elif type_construction == "method":
+                    type_construction = "decorated-method"
                 else:
-                    type_construction = "decorated"
+                    type_construction = "decorated-function"
         else:
             if not type_construction:
-                type_construction = "asd"
+                type_construction = "function"
 
         # Типизация возвращения (если не None, то str название, иначе None)
         returns = ast.unparse(construct.returns) if construct.returns else "None"
@@ -247,7 +251,32 @@ def _parse_construct(
             ])
     elif isinstance(construct, ast.ClassDef):
         # Тип конструкции (функция, класс, метод...)
-        type_construction = "class"
+        if construct.bases:
+            baseslist = construct.bases
+            if isinstance(baseslist[0], ast.Name):
+                if baseslist[0].id == "ABC":
+                    type_construction = "abstract-class"
+
+            if not type_construction:
+                type_construction = "inheritance"
+        elif construct.keywords:
+            keywords = construct.keywords
+            if isinstance(keywords[0].value, ast.Name):
+                if keywords[0].value.id == "ABCMeta":
+                    type_construction = "abstract-class"
+
+            if not type_construction:
+                type_construction = "inheritance"
+        elif len(construct.body) > 1:
+            for arg in construct.body:
+                if isinstance(arg, ast.Assign) and isinstance(arg.targets[0], ast.Name):
+                    if arg.targets[0].id == "__metaclass__":
+                        type_construction = "abstract-class"
+
+            if not type_construction:
+                type_construction = "inheritance"
+        else:
+            type_construction = "class"
 
         # Типизация возвращения (если не None, то str название, иначе None)
         returns = construct.name
