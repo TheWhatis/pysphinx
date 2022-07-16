@@ -283,7 +283,7 @@ MATCH-NUMBER - номер регулярки (функция (match-string match
     (let ((name) ; Название кострукции
 	  (line-start) ; На какой линии начинается
 	  (line-last) ; На какой линии заканчивается объявление
-	  (filepath (format "~/.emacs.d/pysphinx/temp/%s" (buffer-name))) ; Путь до файла с конструкцией
+	  (filepath (concat "~/.emacs.d/pysphinx/temp/%s" (buffer-name))) ; Путь до файла с конструкцией
 	  (line) ; Строка
 	  (result)) ; Эта перменная будет возвращаться
 
@@ -361,6 +361,36 @@ MATCH-NUMBER - номер регулярки (функция (match-string match
 	    (setq result construction))))
 
       result)))
+
+(defun pypshinx--get-correct-construction-data->list ()
+  "Пока неиспользуемая функция (для исправления бага)."
+  (let ((json-array-type 'list)
+	(result)
+	(json-result)
+	(filepath (concat "~/.emacs.d/pysphinx/temp/%s" (buffer-name))))
+
+    ;; Сохраняем весь текст буфера в отдельный файл
+    (when (file-exists-p filepath)
+      (delete-file filepath))
+
+    (write-region nil nil filepath t)
+
+    (setq json-result
+	  (json-read-from-string ; Форматируем json в список
+	   ;; Вызываем функцию, которая фозвращает данные конструкции
+	   ;; предварительно запускаем python через функцию "pysphinx--run-python-internal"
+	   ;; Обязательно должен быть подключен pysphinx.py к нашему шелу Python
+	   (python-shell-send-string-no-output
+	    ;; Передаем параметры
+	    (format "print_construct(\"%s\", %d)"
+		    filepath
+		    (line-number-at-pos)))))
+
+    ;; Если не nil или типа того, то возвращаем результат
+    (when json-result
+      (setq result json-result))
+
+    result))
 
 (defun pysphinx-get-construction-correct-data->list ()
   "Получить данные правильной (ближайшей) конструкции."
@@ -735,7 +765,7 @@ DATA - данные конструкции"
       ;; Для абстрактных методов (@abstractmethod)
       (when (string-match "abstract-method" type)
 	(setq result (pysphinx-generate-template-abstract-method->str level description arguments returns)))
-      
+
       ;; Для декорированных методов (@decorator)
       (when (string-match "decorated-method" type)
 	(setq result (pysphinx-generate-template-decorated-method->str level description arguments returns)))
