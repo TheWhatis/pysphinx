@@ -10,106 +10,82 @@ import json
 
 from typing import Union
 from typing import Any
-from typing import Optional
+# from typing import Optional
 
 _path = str
 _ast_body = list
 
 
-def _parse_entry(body: _ast_body,
-                 name: str,
-                 line_start: int = 0,
-                 level: int = 1,
-                 module: Optional[Union[ast.FunctionDef, ast.ClassDef]] = None):
+def _parse_entry(module,
+                 line: int,
+                 near_line: int = 0,
+                 level: int = 1
+                 ) -> list:
     """
     Функция для получения конструкции (рекурсивная);
     ------------------------------------------------
     .. Получает на вход тело файла/текст, где находиться конструкция и
-       возращает её вложенность и её саму;
+       возращает её и её вложенность;
 
 
-    :param body: ``Object Ast Body``
-        .. Тело, где находиться конструкция;
+    :param module: ``module ast from parse`` - default: None
+       .. Модуль (Python код), полученный из ast.parse('filepath');
 
-    :param name: ``str``
-        .. Название конструцкии;
+    :param line: ``int``
+       .. Номер строки, на которой сейчас находится курсор;
 
-    :param line_start: ``int`` - default: 0
-        .. Номер строки где начинается конструкция;
+    :param near_line: ``int`` - default: 0
+      .. Номер строки ближайшей конструкции - Не обязательный параметр;
 
-    :param level: ``int`` - default: 0
-        .. Уровень её вложенности;
-
-    :param module: ``Optional[Union[ast.FunctionDef, ast.ClassDef]]`` - default: None
-       .. Родительский элемент (не обязательный параметр);
+    :param level: ``int`` - default: 1
+      .. Уровень вложенности конструкции - Не обязательный параметр;
 
 
     :returns; ``list/False``
         .. Возвращает список [
             Уровень вложенности/False,
-            Конструкцию/"текст ошибки"
+            Конструкцию/"текст ошибки",
+            Тип конструкции/None
         ]/False
 
     """
+    # Обработка аргументов
+    line = int(line)
+    near_line = int(near_line)
+    level = int(level)
 
     construction_types = (ast.FunctionDef, ast.ClassDef)
-    result = None
+    message = "Код пуст или не найдено ближайших конструкций \"_parse_entry\""
+
     type_construction = None
+    construction = None
 
-    message = f"В коде конструкций с названием \"{name}\" больше одного - нужно передать аргументы \"line_start\" или \"line_end\""
+    for el in module.body:
+        if type(el) in construction_types:
+            if el.lineno < line:
+                if near_line < el.lineno:
+                    near_line = el.lineno
+                    construction = el
 
-    for construction in body:
-        # Проверка всех конструкций внетри конструкции
-        if "body" in construction.__dict__:
-            if len(construction.body) > 1:
-                entry = _parse_entry(construction.body, name, line_start, (level + 1), construction)
-                if isinstance(entry, list):
-                    if entry[0] and result:
-                        return [None, [message]]
-                    else:
-                        result = entry
+    if not construction:
+        return [None, [message]]
 
-                    # Если было по линии, то возвращаем
-                    if line_start and result[0]:
-                        return result
+    if len(construction.body) > 1:
+        result_entry = _parse_entry(construction, line, near_line, (level + 1))
+        if result_entry[0]:
+            level = result_entry[0]
+            construction = result_entry[1]
+            type_construction = result_entry[2]
 
-                    # Если отработало исключение
-                    if not result[0]:
-                        return result
+    if isinstance(module, ast.ClassDef):
+        type_construction = "method"
 
-        # Перебираем конструкции
-        if type(construction) in construction_types:
-            if construction.name == name:
-                if line_start:
-                    if line_start == construction.lineno:
-                        if module:
-                            if isinstance(module, ast.ClassDef):
-                                type_construction = "method"
-                        result = construction
-                    elif result:
-                        return [None, [message]]
-                elif result:
-                    return [None, [message]]
-                else:
-                    if module:
-                        if isinstance(module, ast.ClassDef):
-                            type_construction = "method"
-                    result = construction
-
-    if result:
-        if isinstance(result, list):
-            return result
-        else:
-            return [level, result, type_construction]
-    else:
-        return result
+    return [level, construction, type_construction]
 
 
 def _parse_construct(
-        code: Union[str, _path],
-        name: str = "",
-        line_start: int = 0,
-        line_end: int = 0
+        code: _path,
+        line: int
 ) -> list:
     """
     Распарсить переданную конструкцию python;
@@ -122,22 +98,17 @@ def _parse_construct(
 
 
     :param code: ``Union[str, path]``
-        .. Текст конструкции или путь до файла с ней;
+        .. Путь до файла с конструкциями;
 
-    :param name: ``str`` - default: ""
-        .. Название конструкции;
-
-    :param line_start: ``int`` - default: 0
-        .. Номер линии, с которой начинается конструкция
-
-    :param line_end: ``int`` - default: 0
-        .. Номер линии, на которой заканчивается конструкция
+    :param line: ``int`` - default: 0
+        .. Номер строки, где находиться курсор;
 
 
     :returns: ``list[Union[str, list]]``
         .. Возвращает список [
                 Уровень вложенности,
-                "Тип конструкции"/None
+                "Тип конструкции"/None,
+                Номер строки конструкции,
                 [
                     "Тип returns"/None,
                     "Description"/None
@@ -152,22 +123,16 @@ def _parse_construct(
 
     # Обработка аргументов
     code = str(code)
-    name = str(name)
-    line_start = int(line_start)
-    line_end = int(line_end)
+    line = int(line)
 
     # Обработка исключений
     # Если код с ошибкой, то возвращаем её
     try:
         # Если передан файл, то получаем содержимое и
         # передаем в ast.parse
-
-        if os.path.exists(os.path.abspath(os.path.expanduser(code))):
-            code = os.path.abspath(os.path.expanduser(code))
-            with open(code) as f:
-                module = ast.parse(f.read())
-        else:
-            module = ast.parse(code)
+        code = os.path.abspath(os.path.expanduser(code))
+        with open(code) as f:
+            module = ast.parse(f.read())
     except Exception as error:
         return [None, [str(error)]]
 
@@ -175,28 +140,19 @@ def _parse_construct(
     # не был передан аргумент "name", то возвращаем ошибку
     len_constructs = len(module.body)
     if not len_constructs:
-        message = "Вы передали неверный \"текст кода/путь\" : \"{code}\""
-        return [None, [message]]
-    elif len_constructs > 1 and not name:
-        message = "Код имеет больше одной функции - необходимо передать аргумент \"name\""
+        message = "Файл с кодом пустой: \"{code}\""
         return [None, [message]]
 
     # Рекурсивно перебирая все элементы получаем нужный
-    construct = _parse_entry(module.body, name, line_start)
+    result_entry = _parse_entry(module, line)
 
     # Проверяем что получили
-    if isinstance(construct, list):
-        if construct[0]:
-            level = construct[0]
-            type_construction = construct[2]  # Тип конструкции (функция, класс, метод)
-            construct = construct[1]
-        else:
-            return construct
-
-    # return construct
-    if not construct:
-        message = f"В коде не найдено конструкции с названием \"{name}\""
-        return [None, [message]]
+    if result_entry[0]:
+        level = result_entry[0]
+        type_construction = result_entry[2]  # Тип конструкции (функция, класс, метод)
+        construct = result_entry[1]
+    else:
+        return construct
 
     returns = "None"  # Типизация функции (что она возвращает)
     description = None  # Описание (если оно есть)
@@ -231,7 +187,10 @@ def _parse_construct(
         returns = ast.unparse(construct.returns) if construct.returns else "None"
 
         # Описание конструкции (если она есть)
-        description = ast.unparse(construct.body[0]) if isinstance(construct.body[0], ast.Expr) else None
+        if isinstance(construct.body[0], ast.Expr):
+            if "targets" not in construct.body[0].__dict__:
+                if isinstance(construct.body[0].value, ast.Constant):
+                    description = ast.unparse(construct.body[0])
 
         len_args = len(construct.args.args)
         len_defaults = len(construct.args.defaults)
@@ -258,7 +217,7 @@ def _parse_construct(
                     type_construction = "abstract-class"
 
             if not type_construction:
-                type_construction = "inheritance"
+                type_construction = "inheritance-class"
         elif construct.keywords:
             keywords = construct.keywords
             if isinstance(keywords[0].value, ast.Name):
@@ -266,23 +225,24 @@ def _parse_construct(
                     type_construction = "abstract-class"
 
             if not type_construction:
-                type_construction = "inheritance"
+                type_construction = "inheritance-class"
         elif len(construct.body) > 1:
             for arg in construct.body:
                 if isinstance(arg, ast.Assign) and isinstance(arg.targets[0], ast.Name):
                     if arg.targets[0].id == "__metaclass__":
                         type_construction = "abstract-class"
 
-            if not type_construction:
-                type_construction = "inheritance"
-        else:
+        if not type_construction:
             type_construction = "class"
 
         # Типизация возвращения (если не None, то str название, иначе None)
         returns = construct.name
 
         # Описание конструкции (если она есть)
-        description = ast.unparse(construct.body[0]) if isinstance(construct.body[0], ast.Expr) else None
+        if isinstance(construct.body[0], ast.Expr):
+            if "targets" not in construct.body[0].__dict__:
+                if isinstance(construct.body[0].value, ast.Constant):
+                    description = ast.unparse(construct.body[0])
 
         len_args = len(construct.body)
 
@@ -308,6 +268,7 @@ def _parse_construct(
     return [
         level,
         type_construction,
+        construct.lineno,
         [
             returns,
             description,
@@ -317,18 +278,15 @@ def _parse_construct(
 
 
 def print_construct(code: Union[str, _path],
-                    name: str = "",
-                    line_start: int = 0,
-                    line_end: int = 0
+                    line: int
                     ):
     """
     Вывести в stdout результат работы parse_construct;
     ---------------------------------------------------
     """
     try:
-        printmessage = _parse_construct(code, name, line_start, line_end)
+        printmessage = _parse_construct(code, line)
     except Exception as error:
-        raise error
         err = str(error)
         printmessage = [err, [err]]
 
