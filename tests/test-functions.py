@@ -2,14 +2,19 @@ from abc import ABCMeta, abstractmethod
 
 
 def decorator(func):
+    el = "string"
+
+    print("Thisis decorator")
+
     def __wrapper__():
-        print("This do decorator")
+        print(el)
         return func()
+
     return __wrapper__
 
 
 class MyClass:
-    """This is my description of class"""
+    """This is myclass description"""
     y: float
     j: str = "String"
     k: dict[str, str] = {"str": "str"}
