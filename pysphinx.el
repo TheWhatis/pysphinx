@@ -393,10 +393,10 @@ DATA - данные конструкции"
 	(indent)
 	(level (nth 0 data))
 	(type (nth 1 data))
-	(returns (nth 0 (nth 3 data)))
-	(description (nth 1 (nth 3 data)))
+	(returns (nth 0 (nth 4 data)))
+	(description (nth 1 (nth 4 data)))
 	(twodes "")
-	(arguments (nth 2 (nth 3 data))))
+	(arguments (nth 2 (nth 4 data))))
 
     ;; Если есть описание, то удаляем ненужные пробелы
     (when description
@@ -445,8 +445,7 @@ TEMPLATE - Текст шаблона"
   "Вставить шаблон конструкции.
 DATA - данные конструкции"
   (let ((template (pysphinx-generate-template-construction->str data))
-	(level (nth 0 data))
-	(type (nth 1 data)))
+	(level (nth 0 data)))
     (when template
       (setq template
 	    (pysphinx-prepare-template-before-put->str level (concat "\"\"\"" "\n"
@@ -458,50 +457,51 @@ DATA - данные конструкции"
 (defun pysphinx-put-docstring ()
   "Вставить docstring для конструкции."
   (interactive)
-  (let* ((data (pypshinx-get-correct-construction-data->list))
-	(line-number (nth 2 data))
-	(region) ; Регион для удаления существующего описания
-	(description)) ; Описание. Нужно для проверки
+  (let ((data (pypshinx-get-correct-construction-data->list))
+	 (line-number) ; Номер строки, куда надо вставлять docstring
+	 (lines-construct) ; Регион для удаления существующего описания
+	 (put-docstring t)
+	 (description)) ; Описание. Нужно для проверки
 
     ;; Если data == nil
     (if (not data)
 	(message (concat "Не найдена ни одна конструкция Python"))
       ;; Если line-number == nil
+      (setq line-number (nth 2 data))
+      (setq lines-construct (nth 3 data))
       (if (not line-number)
 	  (message (concat "Не найдена ни одна конструкция Python"))
 	(if (not (nth 0 data))
 	    (message "Python Error: %s" (nth 1 data))
 	  ;; Если все норм
-	  (setq line-number (+ line-number 1))
-	  (setq description (nth 1 (nth 3 data)))
+	  (setq description (nth 1 (nth 4 data)))
 
-	  ;; Перемещаемся к концу конструкции
-	  (with-no-warnings
-	    (goto-line line-number))
+	  (save-excursion
+	    ;; Если есть описание
+	    (when (stringp description)
+	      ;; Если описание имеет не больше одной строки
+	      (setq description (string-trim description))
+	      (if (not (<= (length (split-string description "\\\\n")) 1))
+		  (message "У этой конструкции уже имеется docstring")
+		;; Если есть существующая конструкция, то удаляем её (потом сделаю другое условие)
+		(when lines-construct
+		  (setq lines-construct (number-sequence (nth 0 lines-construct) (nth 1 lines-construct)))
 
-	  ;; Если есть описание
-	  (when (stringp description)
-	    ;; Если в описании меньше одной строки, то удаляем её
-	    (setq description (string-trim description))
-	    (if (not (<= (length (split-string description "\\\\n")) 1))
-		(message "У этой конструкции уже имеется docstring")
-	      (save-excursion
-		(setq region
-		      (pysphinx-get-line-expression-numbers-from-buffer->list
-		       "\"\"\""
-		       (rx "\"\"\"" (? "\n")) "only-forward"))
-
-		(when region
-		  (setq region (number-sequence (nth 0 region) (nth 0 region)))
-
-		  (dolist (number region)
+		  (dolist (number lines-construct)
 		    (with-no-warnings
 		      (goto-line number))
 		    (kill-whole-line))
-		  ))))
+		  ))
 
-	  ;; Вставляем docstring
-	  (pysphinx-put-template-construction->str data)
+	      (when (not (<= (length (split-string description "\\\\n")) 1))
+		(setq put-docstring nil)))
+
+	    (when put-docstring
+	      (with-no-warnings
+		(goto-line line-number))
+
+	      ;; Вставляем docstring
+	      (pysphinx-put-template-construction->str data)))
 	  )))))
 
 (defvar pysphinx-minor-mode-map

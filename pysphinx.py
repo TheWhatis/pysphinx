@@ -7,13 +7,85 @@
 import os
 import ast
 import json
+import tokenize
 
 from typing import Union
 from typing import Any
-# from typing import Optional
+
+from io import StringIO
 
 _path = str
 _ast_body = list
+
+
+def _get_docstring_line(filepath: _path,
+                        construction: Union[ast.ClassDef, ast.FunctionDef]
+                        ) -> int:
+    """
+    Получить номер строки, куда вставить docstring;
+    -----------------------------------------------
+    .. Получает на вход объект конструкции ast и путь до файла .py где она находиться, и
+       возвращает номер строки, где нужно вставлять docstring
+
+
+    :param filepath: ``_path``
+      .. Путь до файла с конструкцией;
+
+    :param construction: ``Union[ast.ClassDef, ast.Functiondef]``
+      .. Ast объект конструкции;
+
+
+    :returns: ``int``
+    .. Возвращает номер строки;
+    """
+    # Получаем сегмент кода для парсинга
+    with open(filepath) as f:
+        segment = StringIO(ast.get_source_segment(f.read(), construction, padded=False))
+
+    # Это значение вернеться из фукнции
+    res_line_number = 0
+
+    line = 0  # Номер строки
+
+    prev_token = None  # Предыдущий символ, кроме
+
+    # Эти символы пропускаем (нужно для prev_token)
+    skip_chars = (" ", "\n", "-", ">", "]", "[", "->")
+
+    # Объявил, чтобы в цикле не спамить isinstance
+    is_function = isinstance(construction, ast.FunctionDef)
+    is_class = isinstance(construction, ast.ClassDef)
+
+    for token in tokenize.generate_tokens(segment.readline):
+        # Пропускаем строку, если сначала
+        # был найден комментарий (знак перед выражением "#")
+        if token.start[0] > line:
+            if token.string == "#":
+                line = token.start[0]
+
+            # Пропустить если токен не является
+            # знаком припинания
+            if token.string in skip_chars \
+               or token.string.isalpha() \
+               or token.string.replace(".", "").isdigit() \
+               or not token.string.strip():
+                continue
+
+            # Для функции и класса разные условия
+            # Если найдена строка, то прерываем цикл
+            if is_function:
+                if prev_token:
+                    if token.string == ":" and prev_token == ")":
+                        res_line_number = token.start[0]
+                        break
+            elif is_class:
+                if token.string == ":":
+                    res_line_number = token.start[0]
+                    break
+
+            prev_token = token.string
+
+    return construction.lineno + res_line_number
 
 
 def _parse_entry(module,
@@ -132,6 +204,7 @@ def _parse_construct(
         code = os.path.abspath(os.path.expanduser(code))
         with open(code) as f:
             module = ast.parse(f.read())
+
     except Exception as error:
         return [None, [str(error)]]
 
@@ -163,6 +236,33 @@ def _parse_construct(
     # Значение по умолчанию
     argument: Any  # Написал, чтобы не вылезала ошибка incopitable assigment...
     default_value: Any  # Написал, чтобы не вылезала ошибка incopitable assigment...
+
+    start_docstring_line = float('inf')  # Номер строки, где начинается docstring
+    end_docstring_line = 0  # Номер строки, где заканчивается docstring
+
+    # Описание конструкции (если она есть)
+    # А также получение номера строк, где
+    # начинается и заканчивается уже созданный docstring
+    if isinstance(construct.body[0], ast.Expr):
+        if "targets" not in construct.body[0].__dict__:
+            for el in construct.body:
+                if not isinstance(el, ast.Expr):
+                    break
+                elif isinstance(el.value, ast.Constant):
+                    if el.lineno < start_docstring_line:
+                        start_docstring_line = el.lineno
+
+                    if el.end_lineno:
+                        if el.end_lineno > end_docstring_line:
+                            end_docstring_line = el.end_lineno
+
+                    unparsed = ast.unparse(el)
+                    if description:
+                        if len(description) > description:
+                            description = unparsed
+                    else:
+                        description = unparsed
+
     if isinstance(construct, ast.FunctionDef):
         # Тип конструкции (функция, класс, метод...)
         if construct.decorator_list:
@@ -186,12 +286,6 @@ def _parse_construct(
 
         # Типизация возвращения (если не None, то str название, иначе None)
         returns = ast.unparse(construct.returns) if construct.returns else "None"
-
-        # Описание конструкции (если она есть)
-        if isinstance(construct.body[0], ast.Expr):
-            if "targets" not in construct.body[0].__dict__:
-                if isinstance(construct.body[0].value, ast.Constant):
-                    description = ast.unparse(construct.body[0])
 
         len_args = len(construct.args.args)
         len_defaults = len(construct.args.defaults)
@@ -247,12 +341,6 @@ def _parse_construct(
         # Типизация возвращения
         returns = construct.name
 
-        # Описание конструкции (если она есть)
-        if isinstance(construct.body[0], ast.Expr):
-            if "targets" not in construct.body[0].__dict__:
-                if isinstance(construct.body[0].value, ast.Constant):
-                    description = ast.unparse(construct.body[0])
-
         len_args = len(construct.body)
 
         for i in range(len_args):
@@ -274,10 +362,17 @@ def _parse_construct(
     if description:
         description = description[:-1][1:]
 
+    # Если конструкция не найдена, то возвращаем None
+    if isinstance(start_docstring_line, float):
+        lines_docstring = None
+    else:
+        lines_docstring = [start_docstring_line, end_docstring_line]
+
     return [
         level,
         type_construction,
-        construct.lineno,
+        _get_docstring_line(code, construct),
+        lines_docstring,
         [
             returns,
             description,
