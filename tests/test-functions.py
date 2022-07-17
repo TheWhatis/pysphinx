@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from zope.interface import Interface
 
 
 def decorator(func):
@@ -56,6 +57,11 @@ class MyAbstractClass():
     @abstractmethod
     def foo(x, y, c):
         pass
+
+
+class MyInterface(Interface):
+    def myintermethod(self, a, b, c):
+        print("asd")
 
 
 def function(x, y: float, j: str = "Default", k: dict[str, float] = {"str": 3.33}) -> list[list]:
