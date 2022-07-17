@@ -274,7 +274,7 @@ TYPE-SEARCH - тип поиска ('default', 'only-forward', 'only-backward', '
       result))) ; Возвращаем результат
 
 (defun pypshinx-get-correct-construction-data->list ()
-  "Пока неиспользуемая функция (для исправления бага)."
+  "Получить ближайшую конструкцию сверху от курсора."
   (let ((json-array-type 'list)
 	(result)
 	(json-result)
@@ -313,7 +313,7 @@ RETURNS - текст типа возвращенных данных"
   (let ((result)
 	(description pysphinx-template-description)
 	(examples pysphinx-template-examples))
-    
+
     (when (string-match "function" type)
       (setq result pysphinx-template-function))
 
