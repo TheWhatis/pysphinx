@@ -1,13 +1,42 @@
 from abc import ABCMeta, abstractmethod
 from zope.interface import Interface
 
+frametype_class_dict = {}
+
+
+class ID3v2FrameClassFactory(type):
+    def __new__(cls, class_name, parents, attributes):
+        print('Creating class', class_name)
+        # Here we could add some helper methods or attributes to c
+        c = type(class_name, parents, attributes)
+        if attributes['frame_identifier']:
+            frametype_class_dict[attributes['frame_identifier']] = c
+        return c
+
+    @staticmethod
+    def get_class_from_frame_identifier(frame_identifier):
+        return frametype_class_dict.get(frame_identifier)
+
+
+class ID3v2Frame(metaclass=ID3v2FrameClassFactory):
+    frame_identifier = None
+
+
+class ID3v2TitleFrame(ID3v2Frame,
+                      metaclass=ID3v2FrameClassFactory) :
+    frame_identifier = 'TIT2'
+
+
+class ID3v2CommentFrame(ID3v2Frame, metaclass=ID3v2FrameClassFactory)   :
+    frame_identifier = 'COMM'
+
 
 def decorator(func):
     el = "string"
 
     print("Thisis decorator")
 
-    def __wrapper__():
+    def __wrapper__()  :
         print(el)
         return func()
 
@@ -23,8 +52,13 @@ class MyClass:
     def __init__(self, a="str"):
         self.a = a
 
-    def myMethod(self, i: int, s: float = 3.33):
-        """Method Description"""
+    def myMethod(self,
+                 i: int,  # This test description in arguments
+                 s: float = 3.33
+                 ):
+        """My method description"""
+        print('asd')
+        print('asf')
         pass
 
     def function(x, y, j: float, k: int = 3):
@@ -64,7 +98,10 @@ class MyInterface(Interface):
         print("asd")
 
 
-def function(x, y: float, j: str = "Default", k: dict[str, float] = {"str": 3.33}) -> list[list]:
+def function(x,
+             y: float,
+             j: str = "Default",
+             k: dict[str, float] = {"str": 3.33}) -> list[list]:
     """This is the description of function"""
     def entryfunction(x, y, j):
         """This is the description of entry function"""
