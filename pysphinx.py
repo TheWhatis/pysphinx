@@ -62,7 +62,7 @@ def _parse_entry(module,
 
     for el in module.body:
         if type(el) in construction_types:
-            if el.lineno < line:
+            if el.lineno <= line:
                 if near_line < el.lineno:
                     near_line = el.lineno
                     construction = el
@@ -70,12 +70,11 @@ def _parse_entry(module,
     if not construction:
         return [None, [message]]
 
-    if len(construction.body) > 1:
-        result_entry = _parse_entry(construction, line, near_line, (level + 1))
-        if result_entry[0]:
-            level = result_entry[0]
-            construction = result_entry[1]
-            type_construction = result_entry[2]
+    result_entry = _parse_entry(construction, line, near_line, (level + 1))
+    if result_entry[0]:
+        level = result_entry[0]
+        construction = result_entry[1]
+        type_construction = result_entry[2]
 
     if isinstance(module, ast.ClassDef):
         type_construction = "method"
@@ -175,6 +174,8 @@ def _parse_construct(
                     type_construction = "class-method"
                 elif declist[0].id == "abstractmethod":
                     type_construction = "abstract-method"
+                elif declist[0].id == "abstractproperty":
+                    type_construction = "abstract-property-method"
                 elif type_construction == "method":
                     type_construction = "decorated-method"
                 else:
@@ -210,32 +211,40 @@ def _parse_construct(
             ])
     elif isinstance(construct, ast.ClassDef):
         # Тип конструкции (функция, класс, метод...)
+        names_abstract = ("ABC", "ABCMeta", "abc.ABC", "abc.ABCMeta")
+        names_interface = ("zope.interface.Interface", "Interface", "interface.Interface")
+
         if construct.bases:
             baseslist = construct.bases
             if isinstance(baseslist[0], ast.Name):
-                if baseslist[0].id == "ABC":
+                if baseslist[0].id in names_abstract:
                     type_construction = "abstract-class"
+                elif baseslist[0].id in names_interface:
+                    type_construction = "interface"
 
             if not type_construction:
                 type_construction = "inheritance-class"
         elif construct.keywords:
             keywords = construct.keywords
             if isinstance(keywords[0].value, ast.Name):
-                if keywords[0].value.id == "ABCMeta":
+                if keywords[0].value.id in names_abstract:
                     type_construction = "abstract-class"
+                elif keywords[0].value.id in names_interface:
+                    type_construction = "interface"
 
             if not type_construction:
                 type_construction = "inheritance-class"
         elif len(construct.body) > 1:
             for arg in construct.body:
-                if isinstance(arg, ast.Assign) and isinstance(arg.targets[0], ast.Name):
+                if isinstance(arg, ast.Assign) and isinstance(arg.targets[0], ast.Name) and isinstance(arg.value, ast.Name):
                     if arg.targets[0].id == "__metaclass__":
-                        type_construction = "abstract-class"
+                        if arg.value.id in names_abstract:
+                            type_construction = "abstract-class"
 
         if not type_construction:
             type_construction = "class"
 
-        # Типизация возвращения (если не None, то str название, иначе None)
+        # Типизация возвращения
         returns = construct.name
 
         # Описание конструкции (если она есть)

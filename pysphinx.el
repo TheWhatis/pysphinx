@@ -108,6 +108,13 @@
 	  "{returns}" "\n" "\n" "\n"
 	  "{examples}"))
 
+(defvar pysphinx-template-interface
+  (concat "{header}" "\n"
+	  "{description}" "\n" "\n" "\n"
+	  "{arguments}" "\n" "\n" "\n"
+	  "{returns}" "\n" "\n" "\n"
+	  "{examples}"))
+
 (defvar pysphinx-template-method
   (concat "{header}" "\n"
 	  "{description}" "\n" "\n" "\n"
@@ -136,12 +143,20 @@
 	  "{returns}" "\n" "\n" "\n"
 	  "{examples}"))
 
+(defvar pysphinx-template-abstract-property-method
+  (concat "{header}" "\n"
+	  "{description}" "\n" "\n" "\n"
+	  "{arguments}" "\n" "\n" "\n"
+	  "{returns}" "\n" "\n" "\n"
+	  "{examples}"))
+
 (defvar pysphinx-template-decorated-method
   (concat "{header}" "\n"
 	  "{description}" "\n" "\n" "\n"
 	  "{arguments}" "\n" "\n" "\n"
 	  "{returns}" "\n" "\n" "\n"
 	  "{examples}"))
+
 
 (defun pysphinx-generate-template-header->str (header level)
   "Создание заголовка для шаблона.
@@ -326,6 +341,9 @@ RETURNS - текст типа возвращенных данных"
     (when (string-match "abstract-class" type)
       (setq result pysphinx-template-abstract-class))
 
+    (when (string-match "interface" type)
+      (setq result pysphinx-template-interface))
+
     (when (string-match "method" type)
       (setq result pysphinx-template-method))
 
@@ -337,6 +355,9 @@ RETURNS - текст типа возвращенных данных"
 
     (when (string-match "abstract-method" type)
       (setq result pysphinx-template-abstract-method))
+
+    (when (string-match "abstract-property-method" type)
+      (setq result pysphinx-template-abstract-property-method))
 
     (when (string-match "decorated-method" type)
       (setq result pysphinx-template-decorated-method))
