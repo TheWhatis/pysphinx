@@ -386,7 +386,7 @@ def print_construct(code: Union[str, _path],
                     ):
     """
     Вывести в stdout результат работы parse_construct;
-    ---------------------------------------------------
+    --------------------------------------------------
     """
     try:
         printmessage = _parse_construct(code, line)
