@@ -34,7 +34,7 @@
    :param y: ``float``
        .. This is description argument;
 
-   :param j: ``str``.. "Default"
+   :param j: ``str``- default: "Default"
        .. This is description argument;
 
 
@@ -115,7 +115,7 @@
 	   Description
 
 
-	:param x: ``Any`` .. "Default"
+	:param x: ``Any`` - default: "Default"
 	    .. This is description attribute;
 
 	:param y: ``float``
@@ -172,7 +172,7 @@
        :param y: ``float``
 	   .. This is description attribute;
 
-       :param j: ``str`` .. "Default"
+       :param j: ``str`` - default: "Default"
 	   .. This is description attribute;
 
 
@@ -213,7 +213,7 @@
 	:param y: ``float``
 	    .. This is description argument;
 
-	:param j: ``str``.. "Default"
+	:param j: ``str``- default: "Default"
 	    .. This is description argument;
 
 
@@ -260,6 +260,8 @@
 
 * TODO Список задач (pysphinx)
   SCHEDULED: <2022-07-14 Ср 13:00-15:00>--<2022-09-10 Сб 13:00-15:00> DEADLINE: <2022-09-15 Чт>
+  - State "TODO"       from "DOES"       [2022-07-18 Пн 12:44]
+  - State "DOES"       from "TODO"       [2022-07-18 Пн 12:07]
   - State "TODO"       from "DOES"       [2022-07-18 Пн 00:51]
   - State "DOES"       from "TODO"       [2022-07-17 Вс 21:02]
   - State "TODO"       from "DONE"       [2022-07-17 Вс 15:00]
