@@ -26,7 +26,7 @@
      (require 'pysphinx) ; Подключаем `pysphinx'
      (add-hook 'python-mode-hook 'pysphinx-minor-mode) ; Примантируем к `python-mode-hook' `pysphinx-minor-mode'
    #+end_src
-   Когда вы это сделаете, у вас появится комбинация клавиш =C-c h= - к ней привязана интерактивная функция =pysphinx-put-docstring=.
+   Когда вы это сделаете, у вас появится комбинация клавиш =C-c h= - к ней привязана интерактивная функция =pysphinx-put-or-delete-docstring=.
 
   С помощью неё вы сможете добавлять к вашим конструкциям шаблоны =docstring=
 * Использование
