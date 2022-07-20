@@ -416,7 +416,7 @@ DATA - данные конструкции"
     template))
 
 
-(defun pysphinx-put-docstring ()
+(defun pysphinx-put-or-delete-docstring ()
   "Вставить docstring для конструкции."
   (interactive)
   (when (not (python-shell-get-process))
@@ -439,8 +439,12 @@ DATA - данные конструкции"
 	    (message (concat "Не найдена ни одна конструкция Python"))
 	  ;; Если все норм
 	  (setq description (nth 1 (nth 4 data)))
-
+	  
 	  (save-excursion
+	    ;; Переходим к началу конструкции
+	    (with-no-warnings
+	      (goto-line line-number))
+
 	    ;; Если есть описание, то удаляем его
 	    (when (stringp description)
 	      (setq description (string-trim description))
@@ -448,22 +452,17 @@ DATA - данные конструкции"
 		(setq lines-construct (number-sequence (nth 0 lines-construct) (nth 1 lines-construct)))
 
 		(dolist (number lines-construct)
-		  (with-no-warnings
-		    (goto-line number))
 		  (kill-whole-line))
 		))
 
-	    ;; Переходим к началу конструкции
-	    (with-no-warnings
-	      (goto-line line-number))
-
 	    ;; Вставляем docstring
-	    (pysphinx-put-template-construction->str data))
+	    (pysphinx-put-template-construction->str data)
+	    )
 	  )))))
 
 (defvar pysphinx-minor-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c h") 'pysphinx-put-docstring)
+    (define-key map (kbd "C-c h") 'pysphinx-put-or-delete-docstring)
     map)
   "Комбинации клавиш для 'pysphinx-minor-mode'.")
 
