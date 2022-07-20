@@ -53,113 +53,102 @@
   (push header-2 pysphinx-template-header-levels)
   (push header-1 pysphinx-template-header-levels))
 
-(defvar pysphinx-template-header "{header};")
+(defconst pysphinx-template-header "{header};")
 
-(defvar pysphinx-template-description
+(defconst pysphinx-template-description
   (concat ".. This is multistring" "\n"
 	  "   Description"))
 
-(defvar pysphinx-template-argument-name
+(defconst pysphinx-template-argument-name
   ":param {argument_name}:")
-(defvar pysphinx-template-argument-type
+(defconst pysphinx-template-argument-type
   " ``{argument_type}``")
-(defvar pysphinx-template-argument-value
+(defconst pysphinx-template-argument-value
   " - default: {argument_value}")
-(defvar pysphinx-template-argument-description
+(defconst pysphinx-template-argument-description
   "\n{indent}.. This is argument description")
-(defvar pysphinx-template-arguments
+(defconst pysphinx-template-arguments
   (concat "\n" "\n" "\n" "{arguments}"))
 
 
-(defvar pysphinx-template-returns-name
+(defconst pysphinx-template-returns-name
   ":param returns:")
-(defvar pysphinx-template-returns-type
+(defconst pysphinx-template-returns-type
   "``{returns_type}``")
-(defvar pysphinx-template-returns-description
-  "\n{indent}.. This is returns description")
+(defconst pysphinx-template-returns-description
+  "\n{indent}.. This is returns description;")
 
 
-(defvar pysphinx-template-examples
+(defconst pysphinx-template-examples
   (concat "*Examples:*" "\n"
 	  "::" "\n"
 	  "{indent}.. first example:: function(\"asd\", 33) => asd33"))
 
-(defvar pysphinx-template-function
+(defconst pysphinx-template-function
   (concat "{header}" "\n"
 	  "{description}"
 	  "{arguments}"
-	  "{returns}" "\n" "\n" "\n"
-	  "{examples}"))
+	  "{returns}" "\n" "\n" "\n"))
 
-(defvar pysphinx-template-decorated-function
+(defconst pysphinx-template-decorated-function
   (concat "{header}" "\n"
 	  "{description}"
 	  "{arguments}"
-	  "{returns}" "\n" "\n" "\n"
-	  "{examples}"))
+	  "{returns}" "\n" "\n" "\n"))
 
-(defvar pysphinx-template-class
+(defconst pysphinx-template-class
   (concat "{header}" "\n"
 	  "{description}"
 	  "{arguments}"
-	  "{returns}" "\n" "\n" "\n"
-	  "{examples}"))
+	  "{returns}" "\n" "\n" "\n"))
 
-(defvar pysphinx-template-abstract-class
+(defconst pysphinx-template-abstract-class
   (concat "{header}" "\n"
 	  "{description}"
 	  "{arguments}"
-	  "{returns}" "\n" "\n" "\n"
-	  "{examples}"))
+	  "{returns}" "\n" "\n" "\n"))
 
-(defvar pysphinx-template-interface
+(defconst pysphinx-template-interface
   (concat "{header}" "\n"
 	  "{description}"
 	  "{arguments}"
-	  "{returns}" "\n" "\n" "\n"
-	  "{examples}"))
+	  "{returns}" "\n" "\n" "\n"))
 
-(defvar pysphinx-template-method
+(defconst pysphinx-template-method
   (concat "{header}" "\n"
 	  "{description}"
 	  "{arguments}"
-	  "{returns}" "\n" "\n" "\n"
-	  "{examples}"))
+	  "{returns}" "\n" "\n" "\n"))
 
-(defvar pysphinx-template-static-method
+(defconst pysphinx-template-static-method
   (concat "{header}" "\n"
 	  "{description}"
 	  "{arguments}"
-	  "{returns}" "\n" "\n" "\n"
-	  "{examples}"))
+	  "{returns}" "\n" "\n" "\n"))
 
-(defvar pysphinx-template-class-method
+(defconst pysphinx-template-class-method
   (concat "{header}" "\n"
 	  "{description}"
 	  "{arguments}"
-	  "{returns}" "\n" "\n" "\n"
-	  "{examples}"))
+	  "{returns}" "\n" "\n" "\n"))
 
-(defvar pysphinx-template-abstract-method
+(defconst pysphinx-template-abstract-method
   (concat "{header}" "\n"
 	  "{description}"
 	  "{arguments}"
-	  "{returns}" "\n" "\n" "\n"
-	  "{examples}"))
+	  "{returns}" "\n" "\n" "\n"))
 
-(defvar pysphinx-template-abstract-property-method
+(defconst pysphinx-template-abstract-property-method
   (concat "{header}" "\n"
 	  "{description}"
 	  "{arguments}"
-	  "{returns}" "\n" "\n" "\n"
-	  "{examples}"))
+	  "{returns}" "\n" "\n" "\n"))
 
-(defvar pysphinx-template-decorated-method
+(defconst pysphinx-template-decorated-method
   (concat "{header}" "\n"
 	  "{description}"
 	  "{arguments}"
-	  "{returns}" "\n" "\n" "\n"
-	  "{examples}"))
+	  "{returns}" "\n" "\n" "\n"))
 
 
 (defun pysphinx-generate-template-header->str (header level)
@@ -176,11 +165,13 @@ LEVEL - уровень вложенности"
 	  (concat header "\n" (make-string (length header) char)))
     header))
 
+
 (defun pysphinx-generate-template-description->str ()
   "Создание описания для шаблона."
   (let ((result))
     (setq result pysphinx-template-description)
     result))
+
 
 (defun pysphinx-generate-template-arguments->str (arguments)
   "Создание описания аргументов для шаблона.
@@ -190,6 +181,7 @@ ARGUMENTS - аргументы конструкций"
 	(setq arguments (replace-regexp-in-string "{arguments}" arguments pysphinx-template-arguments))
       (setq arguments (string-trim arguments)))
     arguments))
+
 
 (defun pysphinx-generate-template-argument->str (arg)
     "Создание описания аргумента для шаблона.
@@ -217,11 +209,13 @@ RETURNS - что возвращает конструкция (полученны
 		  pysphinx-template-returns-description))
     result))
 
+
 (defun pysphinx-create-directory-if-not-exists (path)
   "Создать директорию если она не существует.
 PATH - путь до нее"
   (when (not (file-exists-p path))
     (make-directory path)))
+
 
 ;; Создает нужные директории для работы пакета
 (pysphinx-create-directory-if-not-exists "~/.emacs.d/pysphinx")
@@ -236,8 +230,7 @@ HEADER - текст заголовка либо nil
 ARGUMENTS - список аргументов либо nil
 RETURNS - текст типа возвращенных данных"
   (let ((result)
-	(description pysphinx-template-description)
-	(examples pysphinx-template-examples))
+	(description pysphinx-template-description))
 
     (when (string-match "function" type)
       (setq result pysphinx-template-function))
@@ -292,9 +285,9 @@ RETURNS - текст типа возвращенных данных"
       (setq result (replace-regexp-in-string "{header}" header result))
       (setq result (replace-regexp-in-string "{description}" description result))
       (setq result (replace-regexp-in-string "{arguments}" arguments result))
-      (setq result (replace-regexp-in-string "{returns}" returns result))
-      (setq result (replace-regexp-in-string "{examples}" examples result)))
+      (setq result (replace-regexp-in-string "{returns}" returns result)))
     result))
+
 
 (defun pysphinx-generate-template-construction->str (data)
   "Генерировать шаблон для конструкции.
@@ -332,11 +325,13 @@ DATA - данные конструкции"
 
     result))
 
+
 ;; Основные функции
 (defvar pysphinx--python-boilerplate-file-path ; Путь до модуля python
   (concat
    (file-name-directory (or load-file-name buffer-file-name))
    "pysphinx.py"))
+
 
 (defun pysphinx--run-python-internal ()
   "Запустить скрытно оболочку python."
@@ -349,23 +344,29 @@ DATA - данные конструкции"
      (buffer-string)))
   )
 
-(defun pypshinx-get-correct-construction-data->list ()
-  "Получить ближайшую конструкцию сверху от курсора."
-  (let ((json-array-type 'list)
-	(result)
-	(json-result)
-	(filepath (concat "~/.emacs.d/pysphinx/temp/%s" (buffer-name))))
 
+(defun pysphinx-create-temp-file->str ()
+  "Создать временный файл для передачи его в python."
+  (let ((filepath (concat "~/.emacs.d/pysphinx/temp/%s" (buffer-name))))
     ;; Сохраняем весь текст буфера в отдельный файл
     (when (file-exists-p filepath)
       (delete-file filepath))
 
     (write-region nil nil filepath t)
+    filepath))
+
+
+(defun pypshinx-get-correct-construction-data->list ()
+  "Получить ближайшую конструкцию сверху от курсора."
+  (let ((json-array-type 'list)
+	(result)
+	(json-result)
+	(filepath (pysphinx-create-temp-file->str)))
 
     (setq json-result
 	  (json-read-from-string ; Форматируем json в список
 	   ;; Вызываем функцию, которая фозвращает данные конструкции
-	   ;; предварительно запускаем python через функцию "pysphinx--run-python-internal"
+	   ;; предварительно запускаем python через функцию `pysphinx--run-python-internal'
 	   ;; Обязательно должен быть подключен pysphinx.py к нашему шелу Python
 	   (python-shell-send-string-no-output
 	    ;; Передаем параметры
@@ -377,6 +378,7 @@ DATA - данные конструкции"
     (when json-result
       (setq result json-result))
     result))
+
 
 (defun pysphinx-prepare-template-before-put->str (level template)
   "Обработать шаблон перед вставкой.
@@ -397,6 +399,7 @@ TEMPLATE - Текст шаблона"
       (setq result (concat result string "\n")))
     result))
 
+
 (defun pysphinx-put-template-construction->str (data)
   "Вставить шаблон конструкции.
 DATA - данные конструкции"
@@ -409,6 +412,7 @@ DATA - данные конструкции"
 								     "\n" "\"\"\"")))
       (insert template))
     template))
+
 
 (defun pysphinx-put-docstring ()
   "Вставить docstring для конструкции."
@@ -423,7 +427,7 @@ DATA - данные конструкции"
 
     ;; Если data == nil
     (if (not data)
-	(message (concat "Не найдена ни одна конструкция Python"))
+	(message (concat "Не найдена ни одна конструкция Python или была допущена ошибка в коде"))
       ;; Если ошибка в коде
       (if (not (nth 0 data))
 	  (message "Python Error: %s" (nth 1 data))
@@ -469,6 +473,7 @@ DATA - данные конструкции"
     map)
   "Комбинации клавиш для 'pysphinx-minor-mode'.")
 
+
 (define-minor-mode pysphinx-minor-mode
   "Sphinx генератор документаций (docstring) для кода Python"
   :init-value nil
@@ -476,6 +481,7 @@ DATA - данные конструкции"
   :keymap pysphinx-minor-mode-map
   (when pysphinx-minor-mode ; ON
     (pysphinx--run-python-internal)))
+
 
 (provide 'pysphinx)
 ;;; pysphinx.el ends here

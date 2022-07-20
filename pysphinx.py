@@ -179,7 +179,11 @@ def _parse_construct(
         .. Возвращает список [
                 Уровень вложенности,
                 "Тип конструкции"/None,
-                Номер строки конструкции,
+                Номер строки, где вставить docstring,
+                [
+                    номер строки где начинается docstring,
+                    номер строки где кончается,
+                ]/None,
                 [
                     "Тип returns"/None,
                     "Description"/None
@@ -188,7 +192,8 @@ def _parse_construct(
                         ["name", False, "default_value"],
                         ["name", False, False],
                     ]
-                ]
+                ],
+                Номер строки, где находиться конструкция
             ]
     """
 
@@ -377,7 +382,7 @@ def _parse_construct(
             returns,
             description,
             arguments
-        ]
+        ],
     ]
 
 
