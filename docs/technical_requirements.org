@@ -7,302 +7,259 @@
 #+LANGUAGE: ru
 
 * 1. Цель проекта
-Цель проекта: /разработать пакет для/ *Emacs* (далее Пакет), который
-позволит автоматически проставлять шаблон =Python Docstring= в формате /reStructuredText (ReST)/ по
-определенным сочетаниям клавиш
+  Цель проекта: /разработать пакет для/ *Emacs* (далее Пакет), который
+  позволит автоматически проставлять шаблон =Python Docstring= в формате /reStructuredText (ReST)/ по
+  определенным сочетаниям клавиш
 
 ** Например:
-К этой функции добавится
-#+begin_src python
-  def foo(x, y: float, j: dict = "Default") -> str:
-      pass
-#+end_src
+   К этой функции добавится
+   #+begin_src python
+     def foo(x, y: float, j: dict = "Default") -> str:
+	 pass
+   #+end_src
 
-вот такой =docstring=
-#+begin_src python
-  def foo(x, y: float, j: str = "Default"):
-   """
-   Function Title;
-   ---------------
-   .. Function multistring
-      Description
-
-
-   :param x: ``Any``
-       .. This is description argument;
-
-   :param y: ``float``
-       .. This is description argument;
-
-   :param j: ``str``- default: "Default"
-       .. This is description argument;
+   вот такой =docstring=
+   #+begin_src python
+     def foo(x, y: float, j: str = "Default"):
+      """
+      Function Title;
+      ---------------
+      .. Function multistring
+	 Description
 
 
-   :returns: ``str``
-      .. This is description returns value
+      :param x: ``Any``
+	  .. This is description argument;
+
+      :param y: ``float``
+	  .. This is description argument;
+
+      :param j: ``str``- default: "Default"
+	  .. This is description argument;
 
 
-   ,*Examples:*
-   ::
-       .. include:: path/to/file.rst
-   """
-       pass
-#+end_src
+      :returns: ``str``
+	 .. This is description returns value
+
+
+      ,*Examples:*
+      ::
+	  .. include:: path/to/file.rst
+      """
+	  pass
+   #+end_src
 
 
 * 2. Описание Пакета
-Для начала надо будет сделать функции, которые подставляют
-статичный шаблон (без возможности выбрать его блоки).
+  Для начала надо будет сделать функции, которые подставляют
+  статичный шаблон (без возможности выбрать его блоки).
 
-А в дальнейшем уже расширить Пакет и добавить возможность
-/выбора блоков шаблона/ + добавить опциональные блоки.
-А также изменения языка шаблона.
+  А в дальнейшем уже расширить Пакет и добавить возможность
+  /выбора блоков шаблона/ + добавить опциональные блоки.
+  А также изменения языка шаблона.
 
-Ну а сейчас эти функции будут автоматически парсить аргументы, типизацию и
-значения по умолчанию для подставки этих значений в описание (см.выше Пример)
+  Ну а сейчас эти функции будут автоматически парсить аргументы, типизацию и
+  значения по умолчанию для подставки этих значений в описание (см.выше Пример)
 
 *** Пакет состоит из следующих основных функций:
-1. Создание шаблона для функций
-2. Создание шаблона для классов
-3. Создание шаблона для методов класса
-4. Проверка проставки правильных уровней заголовков
-   В зависимости от того, насколько сильная вложенность функций/классов/методов
-     - настолько будет различаться уровень заголовков ::
-       # Будет анализ всего python кода
-       # file.py:
-       # header 1;
-       #  def...:
-       #  header 2;
-       #    def...:
-       #    header 3;
+    1. Создание шаблона для функций
+    2. Создание шаблона для классов
+    3. Создание шаблона для методов класса
+    4. Проверка проставки правильных уровней заголовков
+       В зависимости от того, насколько сильная вложенность функций/классов/методов
+       - настолько будет различаться уровень заголовков ::
+	 # Будет анализ всего python кода
+	 # file.py:
+	 # header 1;
+	 #  def...:
+	 #  header 2;
+	 #    def...:
+	 #    header 3;
 ** 2.1 Шаблон функций
 *** Шаблон будет состоять из:
-1. Заголовка
-2. Описания
-3. Списка аргументов, их значения и описание
-4. Что возвращает функция и описание
-5. Примеров использования
-6. Опциональных блоков (*Дополнить*)
+    1. Заголовка
+    2. Описания
+    3. Списка аргументов, их значения и описание
+    4. Что возвращает функция и описание
+    5. Примеров использования
+    6. Опциональных блоков (*Дополнить*)
 *** Пример (см.выше Пример)
 ** 2.2 Шаблон классов
 *** Шаблон будет состоять из:
-1. Заголовка
-2. Описания
-3. Списка атрибутов и их значения
-4. Что возвращает класс
-5. Примеров использования
-6. Опциональных блоков (*Дополнить*)
+    1. Заголовка
+    2. Описания
+    3. Списка атрибутов и их значения
+    4. Что возвращает класс
+    5. Примеров использования
+    6. Опциональных блоков (*Дополнить*)
 
 *** Пример:
-К этому классу добавится
-#+begin_src python
-  class MyClass:
-      x = "String"
-      y: float
-      j: str
+    К этому классу добавится
+    #+begin_src python
+      class MyClass:
+	  x = "String"
+	  y: float
+	  j: str
 
-      def __init__(self):
-	  pass
-#+end_src
+	  def __init__(self):
+	      pass
+    #+end_src
 
-Вот такой =docstring=
-#+begin_src python
-  class MyClass:
-      """
-	Class Title;
-	------------
-	.. Class multistring
-	   Description
-
-
-	:param x: ``Any`` - default: "Default"
-	    .. This is description attribute;
-
-	:param y: ``float``
-	    .. This is description attribute;
-
-	:param j: ``str``
-	    .. This is description attribute;
+    Вот такой =docstring=
+    #+begin_src python
+      class MyClass:
+	  """
+	    Class Title;
+	    ------------
+	    .. Class multistring
+	       Description
 
 
-	:returns: ``MyClass``
-	   .. This is description returns value
+	    :param x: ``Any`` - default: "Default"
+		.. This is description attribute;
+
+	    :param y: ``float``
+		.. This is description attribute;
+
+	    :param j: ``str``
+		.. This is description attribute;
 
 
-	,*Examples:*
-	::
-	    .. include:: path/to/file.rst
-	"""
-      x = "String"
-      y: float
-      j: str
+	    :returns: ``MyClass``
+	       .. This is description returns value
 
-      def __init__(self):
-	  pass
-#+end_src
+
+	    ,*Examples:*
+	    ::
+		.. include:: path/to/file.rst
+	    """
+	  x = "String"
+	  y: float
+	  j: str
+
+	  def __init__(self):
+	      pass
+    #+end_src
 ** 2.3 Шаблон методов классов
 *** Шаблон будет состоять из:
-1. Заголовка
-2. Описания
-3. Списка аргументов и их значения
-4. Что возвращает
-5. Примеров использования
-6. Опциональных блоков (*Дополнить*)
+    1. Заголовка
+    2. Описания
+    3. Списка аргументов и их значения
+    4. Что возвращает
+    5. Примеров использования
+    6. Опциональных блоков (*Дополнить*)
 
 *** Пример:
-К этому методу добавится
-#+begin_src python
-  def my_class_method(self, x, y: float, j: str = "Default"):
-      pass
-#+end_src
+    К этому методу добавится
+    #+begin_src python
+      def my_class_method(self, x, y: float, j: str = "Default"):
+	  pass
+    #+end_src
 
-вот такой =docstring=
-#+begin_src python
-  def my_class_method(self, x, y: float, j: str = "Default") -> float:
-       """
-       Method Class Title;
-       ~~~~~~~~~~~~~~~~~~~
-       .. Method Class multistring
-	  Description
-
-
-       :param x: ``Any``
-	   .. This is description attribute;
-
-       :param y: ``float``
-	   .. This is description attribute;
-
-       :param j: ``str`` - default: "Default"
-	   .. This is description attribute;
+    вот такой =docstring=
+    #+begin_src python
+      def my_class_method(self, x, y: float, j: str = "Default") -> float:
+	   """
+	   Method Class Title;
+	   ~~~~~~~~~~~~~~~~~~~
+	   .. Method Class multistring
+	      Description
 
 
-       :returns: ``float``
-	  .. This is description returns value
+	   :param x: ``Any``
+	       .. This is description attribute;
+
+	   :param y: ``float``
+	       .. This is description attribute;
+
+	   :param j: ``str`` - default: "Default"
+	       .. This is description attribute;
 
 
-       ,*Examples:*
-       ::
-	   .. include:: path/to/file.rst
-       """
-	   pass
-#+end_src
+	   :returns: ``float``
+	      .. This is description returns value
+
+
+	   ,*Examples:*
+	   ::
+	       .. include:: path/to/file.rst
+	   """
+	       pass
+    #+end_src
 ** 2.4 Проставка правильных заголовков
 *** Анализ файла и проставка заголовков
 *** Пример:
-Допустим у нас есть код:
-#+begin_src python
-  """
-  Example python code;
-  ====================
-
-  .. Description python module/code
-  """
-
-
-  def foo(x, y: float, j: str = "Default"):
+    Допустим у нас есть код:
+    #+begin_src python
       """
-	Function Title;
-	---------------
-	.. Function multistring
-	   Description
+      Example python code;
+      ====================
+
+      .. Description python module/code
+      """
 
 
-	:param x: ``Any``
-	    .. This is description argument;
-
-	:param y: ``float``
-	    .. This is description argument;
-
-	:param j: ``str``- default: "Default"
-	    .. This is description argument;
-
-
-	:returns: ``str``
-	   .. This is description returns value
-
-
-	*Examples:*
-	::
-	    .. include:: path/to/file.rst
-	"""
-	    pass
-#+end_src
-
-И Завернем функцию в другую функцию (Обязательно см.код) ↓
-#+begin_src python
-  """
-  Example python code;
-  ====================
-
-  .. Description python module/code
-  """
-  def wrap_foo():
       def foo(x, y: float, j: str = "Default"):
-      """
-	Function Title;
-	~~~~~~~~~~~~~~~
-#+end_src
+	  """
+	    Function Title;
+	    ---------------
+	    .. Function multistring
+	       Description
 
-*/--------------- -> ~~~~~~~~~~~~~~~/ Уровень заголовка изменился*
-*Получается при изменении вложенности кода, изменяется уровень заголовка в* =docstring=
+
+	    :param x: ``Any``
+		.. This is description argument;
+
+	    :param y: ``float``
+		.. This is description argument;
+
+	    :param j: ``str``- default: "Default"
+		.. This is description argument;
+
+
+	    :returns: ``str``
+	       .. This is description returns value
+
+
+	    ,*Examples:*
+	    ::
+		.. include:: path/to/file.rst
+	    """
+		pass
+    #+end_src
+
+    И Завернем функцию в другую функцию (Обязательно см.код) ↓
+    #+begin_src python
+      """
+      Example python code;
+      ====================
+
+      .. Description python module/code
+      """
+      def wrap_foo():
+	  def foo(x, y: float, j: str = "Default"):
+	      """
+	      Function Title;
+	      ~~~~~~~~~~~~~~~
+    #+end_src
+
+    */--------------- -> ~~~~~~~~~~~~~~~/ Уровень заголовка изменился*
+    *Получается при изменении вложенности кода, изменяется уровень заголовка в* =docstring=
 ** Стек Пакета
 *** Python
-Версия Python: 3.10.5
-- Модуль ast
-- Модуль tokenize
-- Модуль typing
-- Модуль io
+    Версия Python: 3.10.5
+    - Модуль ast
+    - Модуль tokenize
+    - Модуль typing
+    - Модуль io
 *** Emacs Lisp
-Версия Emacs: 27.2
-- Модуль python
-- Модуль json
-- Модуль rx
+    Версия Emacs: 27.2
+    - Модуль python
+    - Модуль json
+    - Модуль rx
 
 * TODO Список задач (pysphinx)
   SCHEDULED: <2022-07-14 Ср 13:00-15:00>--<2022-09-10 Сб 13:00-15:00> DEADLINE: <2022-09-15 Чт>
-  - State "TODO"       from "DONE"       [2022-07-20 Ср 17:31]
-  - State "DONE"       from "DOES"       [2022-07-20 Ср 16:47]
-  - State "DOES"       from "TODO"       [2022-07-20 Ср 13:50]
-  - State "TODO"       from "CANCELED"   [2022-07-19 Вт 16:07]
-  - State "CANCELED"   from "DOES"       [2022-07-19 Вт 16:07]
-  - State "DOES"       from "CANCELED"   [2022-07-19 Вт 16:07]
-  - State "CANCELED"   from "DOES"       [2022-07-19 Вт 16:07]
-  - State "DOES"       from "TODO"       [2022-07-18 Пн 21:58]
-  - State "TODO"       from "WAIT"       [2022-07-18 Пн 15:05]
-  - State "WAIT"       from "DOES"       [2022-07-18 Пн 14:01]
-  - State "DOES"       from "WAIT"       [2022-07-18 Пн 13:33]
-  - State "WAIT"       from "DOES"       [2022-07-18 Пн 13:27]
-  - State "DOES"       from "WAIT"       [2022-07-18 Пн 13:22]
-  - State "WAIT"       from "DOES"       [2022-07-18 Пн 13:21]
-  - State "DOES"       from "TODO"       [2022-07-18 Пн 12:47]
-  - State "TODO"       from "DOES"       [2022-07-18 Пн 12:44]
-  - State "DOES"       from "TODO"       [2022-07-18 Пн 12:07]
-  - State "TODO"       from "DOES"       [2022-07-18 Пн 00:51]
-  - State "DOES"       from "TODO"       [2022-07-17 Вс 21:02]
-  - State "TODO"       from "DONE"       [2022-07-17 Вс 15:00]
-  - State "DONE"       from "DOES"       [2022-07-17 Вс 15:00]
-  - State "DOES"       from "WAIT"       [2022-07-17 Вс 13:50]
-  - State "WAIT"       from "TODO"       [2022-07-17 Вс 13:02]
-  - State "TODO"       from "DONE"       [2022-07-16 Сб 15:57]
-  - State "DONE"       from "DOES"       [2022-07-16 Сб 15:01]
-  - State "DOES"       from "WAIT"       [2022-07-16 Сб 14:57]
-  - State "WAIT"       from "DOES"       [2022-07-16 Сб 14:34]
-  - State "DOES"       from "WAIT"       [2022-07-16 Сб 13:40]
-  - State "WAIT"       from "DOES"       [2022-07-16 Сб 13:34]
-  - State "DOES"       from "TODO"       [2022-07-16 Сб 13:00]
-  - State "TODO"       from "DONE"       [2022-07-15 Пт 14:34]
-  - State "DONE"       from "VERIFY"     [2022-07-15 Пт 14:34]
-  - State "VERIFY"     from "DOES"       [2022-07-15 Пт 14:20]
-  - State "DOES"       from "WAIT"       [2022-07-15 Пт 13:55]
-  - State "WAIT"       from "DOES"       [2022-07-15 Пт 13:49]
-  - State "DOES"       from "WAIT"       [2022-07-15 Пт 13:40]
-  - State "WAIT"       from "DOES"       [2022-07-15 Пт 13:39]
-  - State "DOES"       from "TODO"       [2022-07-15 Пт 12:59]
-  - State "TODO"       from "DONE"       [2022-07-14 Чт 19:36]
-  - State "DONE"       from "DOES"       [2022-07-14 Чт 19:36]
-  - State "DOES"       from "DONE"       [2022-07-14 Чт 19:04]
-  - State "DONE"       from "CANCELED"   [2022-07-14 Чт 19:04]
-
   - [X] Дописать *Стек Пакета*
   - [X] Модуль для парсинга конструкций python
     1. [X] Python скрипт, который возвращает данные
@@ -383,19 +340,6 @@
   - [ ] Сделать так, чтобы правильно проставлялись табуляции и т.п. (чтобы было удобно пользоваться) при использовании reStructuredtExt в docstring Python
 *** TODO pysphinx *bugfix*
     SCHEDULED: <2022-07-16 Сб 18:00-19:00>
-    - State "TODO"       from "DOES"       [2022-07-18 Пн 00:51]
-    - State "DOES"       from "TODO"       [2022-07-17 Вс 20:42]
-    - State "TODO"       from "DONE"       [2022-07-16 Сб 22:29]
-    - State "DONE"       from "DOES"       [2022-07-16 Сб 22:29]
-    - State "DOES"       from "WAIT"       [2022-07-16 Сб 21:35]
-    - State "WAIT"       from "DOES"       [2022-07-16 Сб 21:26]
-    - State "DOES"       from "DONE"       [2022-07-16 Сб 20:18]
-    - State "DONE"       from "DOES"       [2022-07-16 Сб 19:07]
-    - State "DOES"       from "WAIT"       [2022-07-16 Сб 18:55]
-    - State "WAIT"       from "DOES"       [2022-07-16 Сб 18:37]
-    - State "DOES"       from "WAIT"       [2022-07-16 Сб 18:11]
-    - State "WAIT"       from "DOES"       [2022-07-16 Сб 18:08]
-    - State "DOES"       from "TODO"       [2022-07-16 Сб 18:06]
     SCHEDULED: <2022-07-16 Сб 20:01-21:00>
     + [X] При добавлении docstring, когда не найден уже сущесвтующий, но первым элементом идет какой-то код, он определяет его (в частности было print("this decorator")) как docstring и удаляет, при этом не добавляя новый
     + [X] Исправить баг с определением дублирующимися конструкциями (не должно быть таких ньюансов)
