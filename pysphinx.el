@@ -337,13 +337,13 @@ DATA - данные конструкции"
 
 (defun pysphinx--run-python-internal ()
   "Запустить скрытно оболочку python."
-  (python-shell-make-comint
-   (python-shell-calculate-command)
-   (python-shell-get-process-name nil) nil)
-  (python-shell-send-string-no-output
+  (python-shell-send-string-no-output ; Вставляем код pysphinx.py в shell Python
+   ;; Создаем временный буфер для чтения кода pysphinx.py
+   ;; а также запускаем скрытно shell python (python internal shell)
    (with-temp-buffer
      (insert-file-contents pysphinx--python-boilerplate-file-path)
-     (buffer-string)))
+     (buffer-string))
+   (python-shell-internal-get-or-create-process))
   )
 
 
@@ -374,7 +374,9 @@ DATA - данные конструкции"
 	    ;; Передаем параметры
 	    (format "print_construct(\"%s\", %d)"
 		    filepath
-		    (line-number-at-pos)))))
+		    (line-number-at-pos))
+	    (python-shell-internal-get-or-create-process))
+	   ))
 
     ;; Если не nil или типа того, то возвращаем результат
     (when json-result
@@ -419,8 +421,12 @@ DATA - данные конструкции"
 (defun pysphinx-put-or-delete-docstring ()
   "Вставить docstring для конструкции."
   (interactive)
+  
+  ;; Если не запущен shell Python, то запускаем его
   (when (not (python-shell-get-process))
     (pysphinx--run-python-internal))
+
+  ;; Дальше вставка или удаление docstring
   (let ((data (pypshinx-get-correct-construction-data->list))
 	(line-number) ; Номер строки, куда надо вставлять docstring
 	(lines-construct) ; Регион для удаления существующего описания
