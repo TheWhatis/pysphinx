@@ -8,8 +8,10 @@
 
 * 1. Цель проекта
   Цель проекта: /разработать пакет для/ *Emacs* (далее Пакет), который
-  позволит автоматически проставлять шаблон =Python Docstring= в формате /reStructuredText (ReST)/ по
+  позволит автоматически вставлять шаблон =Python Docstring= в формате /reStructuredText (ReST)/ по
   определенным сочетаниям клавиш
+
+  UPDATE: автоматически вставлять шаблон =Python Docstring= в форматах /javadoc, ReST, Google doc, numpydoc/
 
 ** Например:
    К этой функции добавится
@@ -61,131 +63,14 @@
   Ну а сейчас эти функции будут автоматически парсить аргументы, типизацию и
   значения по умолчанию для подставки этих значений в описание (см.выше Пример)
 
-*** Пакет состоит из следующих основных функций:
-    1. Создание шаблона для функций
-    2. Создание шаблона для классов
-    3. Создание шаблона для методов класса
-    4. Проверка проставки правильных уровней заголовков
-       В зависимости от того, насколько сильная вложенность функций/классов/методов
-       - настолько будет различаться уровень заголовков ::
-	 # Будет анализ всего python кода
-	 # file.py:
-	 # header 1;
-	 #  def...:
-	 #  header 2;
-	 #    def...:
-	 #    header 3;
-** 2.1 Шаблон функций
+** 2.1 Шаблон конструкций
 *** Шаблон будет состоять из:
     1. Заголовка
     2. Описания
-    3. Списка аргументов, их значения и описание
-    4. Что возвращает функция и описание
-    5. Примеров использования
+    3. Списка аргументов, их значения, типа и описания
+    4. Что возвращает функция, её тип и описание
     6. Опциональных блоков (*Дополнить*)
 *** Пример (см.выше Пример)
-** 2.2 Шаблон классов
-*** Шаблон будет состоять из:
-    1. Заголовка
-    2. Описания
-    3. Списка атрибутов и их значения
-    4. Что возвращает класс
-    5. Примеров использования
-    6. Опциональных блоков (*Дополнить*)
-
-*** Пример:
-    К этому классу добавится
-    #+begin_src python
-      class MyClass:
-	  x = "String"
-	  y: float
-	  j: str
-
-	  def __init__(self):
-	      pass
-    #+end_src
-
-    Вот такой =docstring=
-    #+begin_src python
-      class MyClass:
-	  """
-	    Class Title;
-	    ------------
-	    .. Class multistring
-	       Description
-
-
-	    :param x: ``Any`` - default: "Default"
-		.. This is description attribute;
-
-	    :param y: ``float``
-		.. This is description attribute;
-
-	    :param j: ``str``
-		.. This is description attribute;
-
-
-	    :returns: ``MyClass``
-	       .. This is description returns value
-
-
-	    ,*Examples:*
-	    ::
-		.. include:: path/to/file.rst
-	    """
-	  x = "String"
-	  y: float
-	  j: str
-
-	  def __init__(self):
-	      pass
-    #+end_src
-** 2.3 Шаблон методов классов
-*** Шаблон будет состоять из:
-    1. Заголовка
-    2. Описания
-    3. Списка аргументов и их значения
-    4. Что возвращает
-    5. Примеров использования
-    6. Опциональных блоков (*Дополнить*)
-
-*** Пример:
-    К этому методу добавится
-    #+begin_src python
-      def my_class_method(self, x, y: float, j: str = "Default"):
-	  pass
-    #+end_src
-
-    вот такой =docstring=
-    #+begin_src python
-      def my_class_method(self, x, y: float, j: str = "Default") -> float:
-	   """
-	   Method Class Title;
-	   ~~~~~~~~~~~~~~~~~~~
-	   .. Method Class multistring
-	      Description
-
-
-	   :param x: ``Any``
-	       .. This is description attribute;
-
-	   :param y: ``float``
-	       .. This is description attribute;
-
-	   :param j: ``str`` - default: "Default"
-	       .. This is description attribute;
-
-
-	   :returns: ``float``
-	      .. This is description returns value
-
-
-	   ,*Examples:*
-	   ::
-	       .. include:: path/to/file.rst
-	   """
-	       pass
-    #+end_src
 ** 2.4 Проставка правильных заголовков
 *** Анализ файла и проставка заголовков
 *** Пример:
@@ -257,6 +142,10 @@
     - Модуль python
     - Модуль json
     - Модуль rx
+    - Модуль rest-parser (сделать)
+    - Модуль javadoc-parser (сделать)
+    - Модуль googledoc-parser (сделать)
+    - Модуль numpydoc-parser (сделать)
 
 * TODO Список задач (pysphinx)
   SCHEDULED: <2022-07-14 Ср 13:00-15:00>--<2022-09-10 Сб 13:00-15:00> DEADLINE: <2022-09-15 Чт>
