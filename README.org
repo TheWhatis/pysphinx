@@ -12,7 +12,7 @@
   *(см docs/technical_requirements.org)*
 
    =pysphinx= это Emacs minor mode для вставки документации =docstring= в
-   Python функции, методы, классы, данные и т.п. в формате *reStructuredText (ReST)*
+   Python функции, методы, классы, данные и т.п. в формате *reStructuredText (ReST), javadoc, Google doc, numpydoc*
 * Установка
   *Установка пока доступна только с github (в дальнейшем добавлю в melpa)*
 
