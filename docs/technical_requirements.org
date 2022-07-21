@@ -229,14 +229,14 @@
 	- [ ] Parser
     - [ ] google doc
       - [ ] Сделать пакет для анализа google doc разметки;
-	- [ ] tokenizer
-	- [ ] Lexer
-	- [ ] Parser
+        - [ ] tokenizer
+        - [ ] Lexer
+        - [ ] Parser
     - [ ] numpydoc
       - [ ] Сделать пакет для анализа numpydoc разметки;
-	- [ ] tokenizer
-	- [ ] Lexer
-	- [ ] Parser
+        - [ ] tokenizer
+        - [ ] Lexer
+        - [ ] Parser
   - [ ] Маниторинг изменения вложенности кода и изменение уровня их заголовков;
     - [ ] ReST
     - [ ] javadoc
