@@ -224,9 +224,9 @@
   - [ ] Сделать поддержку других форматов документирования кода;
     - [ ] javadoc
       - [ ] Сделать пакет для анализа javadoc разметки;
-	- [ ] tokenizer
-	- [ ] Lexer
-	- [ ] Parser
+        - [ ] tokenizer
+        - [ ] Lexer
+        - [ ] Parser
     - [ ] google doc
       - [ ] Сделать пакет для анализа google doc разметки;
         - [ ] tokenizer
