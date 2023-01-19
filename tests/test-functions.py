@@ -120,3 +120,16 @@ def function2(x, y: float, j: str = "Default", k: dict[str, float] = {"str": 3.3
 @decorator
 def decorated_function(x, y, j, la, o):
     pass
+
+async def async_function(x: int, y, j, la):
+    pass
+
+@decorator
+class MyAsyncClass():
+    __metaclass__ = ABCMeta
+
+    async def __init__(params):
+        pass
+
+    async def method(params):
+        pass

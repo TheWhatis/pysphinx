@@ -149,6 +149,14 @@
 
 * TODO Список задач (pysphinx)
   SCHEDULED: <2022-07-14 Ср 13:00-15:00>--<2022-09-10 Сб 13:00-15:00> DEADLINE: <2022-09-15 Чт>
+  - State "TODO"       from "CANCELED"   [2022-07-25 Пн 12:55]
+  - State "CANCELED"   from "TODO"       [2022-07-25 Пн 12:55]
+  - State "TODO"       from "CANCELED"   [2022-07-24 Вс 17:08]
+  - State "CANCELED"   from "TODO"       [2022-07-24 Вс 17:08]
+  - State "TODO"       from "CANCELED"   [2022-07-23 Сб 01:22]
+  - State "CANCELED"   from "TODO"       [2022-07-23 Сб 01:22]
+  - State "TODO"       from "CANCELED"   [2022-07-22 Пт 14:56]
+  - State "CANCELED"   from "TODO"       [2022-07-22 Пт 14:56]
   - [X] Дописать *Стек Пакета*
   - [X] Модуль для парсинга конструкций python
     1. [X] Python скрипт, который возвращает данные
@@ -262,8 +270,9 @@
     - [ ] javadoc
     - [ ] google doc
     - [ ] numpydoc
-*** TODO pysphinx *bugfix*
+*** DONE pysphinx *bugfix*
     SCHEDULED: <2022-07-16 Сб 18:00-19:00>
+    - State "DONE"       from "TODO"       [2022-07-24 Вс 17:16]
     SCHEDULED: <2022-07-16 Сб 20:01-21:00>
     + [X] При добавлении docstring, когда не найден уже сущесвтующий, но первым элементом идет какой-то код, он определяет его (в частности было print("this decorator")) как docstring и удаляет, при этом не добавляя новый
     + [X] Исправить баг с определением дублирующимися конструкциями (не должно быть таких ньюансов)
