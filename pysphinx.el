@@ -57,7 +57,7 @@
 
 (defconst pysphinx-template-description
   (concat ".. This is multistring" "\n"
-	  "   Description"))
+          "   Description"))
 
 (defconst pysphinx-template-argument-name
   ":param {argument_name}:")
@@ -77,80 +77,80 @@
   "``{returns_type}``")
 (defconst pysphinx-template-returns-description
   (concat "\n"
-	  "{indent}.. This is returns" "\n"
-	  "{indent}   Description;"))
+          "{indent}.. This is returns" "\n"
+          "{indent}   Description;"))
 
 
 (defconst pysphinx-template-examples
   (concat "*Examples:*" "\n"
-	  "::" "\n"
-	  "{indent}.. first example:: function(\"asd\", 33) => asd33"))
+          "::" "\n"
+          "{indent}.. first example:: function(\"asd\", 33) => asd33"))
 
 (defconst pysphinx-template-function
   (concat "{header}" "\n"
-	  "{description}"
-	  "{arguments}"
-	  "{returns}"))
+          "{description}"
+          "{arguments}"
+          "{returns}"))
 
 (defconst pysphinx-template-decorated-function
   (concat "{header}" "\n"
-	  "{description}"
-	  "{arguments}"
-	  "{returns}"))
+          "{description}"
+          "{arguments}"
+          "{returns}"))
 
 (defconst pysphinx-template-class
   (concat "{header}" "\n"
-	  "{description}"
-	  "{arguments}"
-	  "{returns}"))
+          "{description}"
+          "{arguments}"
+          "{returns}"))
 
 (defconst pysphinx-template-abstract-class
   (concat "{header}" "\n"
-	  "{description}"
-	  "{arguments}"
-	  "{returns}"))
+          "{description}"
+          "{arguments}"
+          "{returns}"))
 
 (defconst pysphinx-template-interface
   (concat "{header}" "\n"
-	  "{description}"
-	  "{arguments}"
-	  "{returns}"))
+          "{description}"
+          "{arguments}"
+          "{returns}"))
 
 (defconst pysphinx-template-method
   (concat "{header}" "\n"
-	  "{description}"
-	  "{arguments}"
-	  "{returns}"))
+          "{description}"
+          "{arguments}"
+          "{returns}"))
 
 (defconst pysphinx-template-static-method
   (concat "{header}" "\n"
-	  "{description}"
-	  "{arguments}"
-	  "{returns}"))
+          "{description}"
+          "{arguments}"
+          "{returns}"))
 
 (defconst pysphinx-template-class-method
   (concat "{header}" "\n"
-	  "{description}"
-	  "{arguments}"
-	  "{returns}"))
+          "{description}"
+          "{arguments}"
+          "{returns}"))
 
 (defconst pysphinx-template-abstract-method
   (concat "{header}" "\n"
-	  "{description}"
-	  "{arguments}"
-	  "{returns}"))
+          "{description}"
+          "{arguments}"
+          "{returns}"))
 
 (defconst pysphinx-template-abstract-property-method
   (concat "{header}" "\n"
-	  "{description}"
-	  "{arguments}"
-	  "{returns}"))
+          "{description}"
+          "{arguments}"
+          "{returns}"))
 
 (defconst pysphinx-template-decorated-method
   (concat "{header}" "\n"
-	  "{description}"
-	  "{arguments}"
-	  "{returns}"))
+          "{description}"
+          "{arguments}"
+          "{returns}"))
 
 
 (defun pysphinx-generate-template-header->str (header level)
@@ -160,11 +160,11 @@ LEVEL - уровень вложенности"
   (unless (<= 0 level 3)
     (setq level 3))
   (let ((char (nth level pysphinx-template-header-levels))
-	(header (replace-regexp-in-string "{header}" header pysphinx-template-header)))
+        (header (replace-regexp-in-string "{header}" header pysphinx-template-header)))
     (when (stringp char)
       (setq char (string-to-char char)))
     (setq header
-	  (concat header "\n" (make-string (length header) char)))
+          (concat header "\n" (make-string (length header) char)))
     header))
 
 
@@ -180,7 +180,7 @@ LEVEL - уровень вложенности"
 ARGUMENTS - аргументы конструкций"
   (let ((arguments (mapconcat #'pysphinx-generate-template-argument->str arguments "\n\n")))
     (if (string-trim arguments)
-	(setq arguments (replace-regexp-in-string "{arguments}" arguments pysphinx-template-arguments))
+        (setq arguments (replace-regexp-in-string "{arguments}" arguments pysphinx-template-arguments))
       (setq arguments (string-trim arguments)))
     arguments))
 
@@ -194,10 +194,10 @@ ARG - аргумент конструкции"
       "{argument_name}" name pysphinx-template-argument-name)
      (when type
        (replace-regexp-in-string
-	"{argument_type}" type pysphinx-template-argument-type))
+        "{argument_type}" type pysphinx-template-argument-type))
      (when default-value
        (replace-regexp-in-string
-	"{argument_value}" default-value pysphinx-template-argument-value))
+        "{argument_value}" default-value pysphinx-template-argument-value))
      pysphinx-template-argument-description)))
 
 
@@ -206,9 +206,9 @@ ARG - аргумент конструкции"
 RETURNS - что возвращает конструкция (полученный тип)"
   (let ((result))
     (setq result (concat "\n" "\n" "\n"
-			 pysphinx-template-returns-name " "
-			 (replace-regexp-in-string "{returns_type}" returns pysphinx-template-returns-type)
-			 pysphinx-template-returns-description))
+                         pysphinx-template-returns-name " "
+                         (replace-regexp-in-string "{returns_type}" returns pysphinx-template-returns-type)
+                         pysphinx-template-returns-description))
     result))
 
 
@@ -232,7 +232,7 @@ HEADER - текст заголовка либо nil
 ARGUMENTS - список аргументов либо nil
 RETURNS - текст типа возвращенных данных"
   (let ((result)
-	(description pysphinx-template-description))
+        (description pysphinx-template-description))
 
     (when (string-match "function" type)
       (setq result pysphinx-template-function))
@@ -270,17 +270,17 @@ RETURNS - текст типа возвращенных данных"
     (when result
       ;; Обрабатываем заголовок
       (when (not header)
-	(setq header (concat "This is " type " header")))
+        (setq header (concat "This is " type " header")))
       (setq header (pysphinx-generate-template-header->str header level))
 
       ;; Обрабатываем аргументы
       (if arguments
-	  (setq arguments (pysphinx-generate-template-arguments->str arguments))
+          (setq arguments (pysphinx-generate-template-arguments->str arguments))
 
-	(setq arguments ""))
+        (setq arguments ""))
       ;; Обрабатываем returns
       (when (not returns)
-	(setq returns "None"))
+        (setq returns "None"))
       (setq returns (pysphinx-generate-template-returns->str returns))
 
       ;; Собстенно создание шаблона
@@ -295,13 +295,13 @@ RETURNS - текст типа возвращенных данных"
   "Генерировать шаблон для конструкции.
 DATA - данные конструкции"
   (let ((result)
-	(indent)
-	(level (nth 0 data))
-	(type (nth 1 data))
-	(returns (nth 0 (nth 4 data)))
-	(description (nth 1 (nth 4 data)))
-	(twodes "")
-	(arguments (nth 2 (nth 4 data))))
+        (indent)
+        (level (nth 0 data))
+        (type (nth 1 data))
+        (returns (nth 0 (nth 4 data)))
+        (description (nth 1 (nth 4 data)))
+        (twodes "")
+        (arguments (nth 2 (nth 4 data))))
 
     ;; Если есть описание, то удаляем ненужные пробелы
     (when description
@@ -312,18 +312,21 @@ DATA - данные конструкции"
     (when (or (not description) (<= (length (split-string twodes "\\\\n")) 2))
       ;; Обрабатываем аргументы
       (dolist (idex (number-sequence 1 python-indent-offset)) ; Табуляция
-	(setq indent (concat indent " ")))
+        (setq indent (concat indent " ")))
 
       ;; Для обычных функций
-      (setq result (pysphinx-generate-template->str type level description arguments returns))
+      (if (stringp type)
+          (setq result (pysphinx-generate-template->str type level description arguments returns))
+        (setq result (pysphinx-generate-template->str "function" level description arguments returns)))
+
 
       ;; Для когда не была определена конструкция
       (when (not result)
-	(setq result (pysphinx-generate-template->str "function" level description arguments returns)))
+        (setq result (pysphinx-generate-template->str "function" level description arguments returns)))
 
       ;; Добавляем табуляцию
       (when result
-	(setq result (replace-regexp-in-string "{indent}" indent result))))
+        (setq result (replace-regexp-in-string "{indent}" indent result))))
 
     result))
 
@@ -349,7 +352,7 @@ DATA - данные конструкции"
 
 (defun pysphinx-create-temp-file->str ()
   "Создать временный файл для передачи его в python."
-  (let ((filepath (concat "~/.emacs.d/pysphinx/temp/%s" (buffer-name))))
+  (let ((filepath (concat "~/.emacs.d/pysphinx/temp/" (buffer-name))))
     ;; Сохраняем весь текст буфера в отдельный файл
     (when (file-exists-p filepath)
       (delete-file filepath))
@@ -361,22 +364,22 @@ DATA - данные конструкции"
 (defun pypshinx-get-correct-construction-data->list ()
   "Получить ближайшую конструкцию сверху от курсора."
   (let ((json-array-type 'list)
-	(result)
-	(json-result)
-	(filepath (pysphinx-create-temp-file->str)))
+        (result)
+        (json-result)
+        (filepath (pysphinx-create-temp-file->str)))
 
     (setq json-result
-	  (json-read-from-string ; Форматируем json в список
-	   ;; Вызываем функцию, которая фозвращает данные конструкции
-	   ;; предварительно запускаем python через функцию `pysphinx--run-python-internal'
-	   ;; Обязательно должен быть подключен pysphinx.py к нашему шелу Python
-	   (python-shell-send-string-no-output
-	    ;; Передаем параметры
-	    (format "print_construct(\"%s\", %d)"
-		    filepath
-		    (line-number-at-pos))
-	    (python-shell-internal-get-or-create-process))
-	   ))
+          (json-read-from-string ; Форматируем json в список
+           ;; Вызываем функцию, которая фозвращает данные конструкции
+           ;; предварительно запускаем python через функцию `pysphinx--run-python-internal'
+           ;; Обязательно должен быть подключен pysphinx.py к нашему шелу Python
+           (python-shell-send-string-no-output
+            ;; Передаем параметры
+            (format "print_construct(\"%s\", %d)"
+                    filepath
+                    (line-number-at-pos))
+            (python-shell-internal-get-or-create-process))
+           ))
 
     ;; Если не nil или типа того, то возвращаем результат
     (when json-result
@@ -389,9 +392,9 @@ DATA - данные конструкции"
 LEVEL - Уровень вложенности
 TEMPLATE - Текст шаблона"
   (let ((result)
-	(indent) ; Табуляция
-	(spl-template (split-string template "\n"))) ; Разделяем шаблон по строкам
-
+        (indent) ; Табуляция
+        (spl-template (split-string template "\n"))) ; Разделяем шаблон по строкам
+    
     ;; Получаем правильную табуляцию
     (dolist (idex (number-sequence 1 (* python-indent-offset level)))
       (setq indent (concat indent " ")))
@@ -399,7 +402,7 @@ TEMPLATE - Текст шаблона"
     ;; Добавляем табуляцию
     (dolist (string spl-template)
       (when (> (length string) 0)
-	(setq string (concat indent string)))
+        (setq string (concat indent string)))
       (setq result (concat result string "\n")))
     result))
 
@@ -408,12 +411,13 @@ TEMPLATE - Текст шаблона"
   "Вставить шаблон конструкции.
 DATA - данные конструкции"
   (let ((template (pysphinx-generate-template-construction->str data))
-	(level (nth 0 data)))
+        (level (nth 0 data)))
+    
     (when template
       (setq template
-	    (pysphinx-prepare-template-before-put->str level (concat "\"\"\"" "\n"
-								     template
-								     "\n" "\"\"\"")))
+            (pysphinx-prepare-template-before-put->str level (concat "\"\"\"" "\n"
+                                                                     template
+                                                                     "\n" "\"\"\"")))
       (insert template))
     template))
 
@@ -421,50 +425,49 @@ DATA - данные конструкции"
 (defun pysphinx-put-or-delete-docstring ()
   "Вставить docstring для конструкции."
   (interactive)
-  
+
   ;; Если не запущен shell Python, то запускаем его
   (when (not (python-shell-get-process))
     (pysphinx--run-python-internal))
 
   ;; Дальше вставка или удаление docstring
   (let ((data (pypshinx-get-correct-construction-data->list))
-	(line-number) ; Номер строки, куда надо вставлять docstring
-	(lines-construct) ; Регион для удаления существующего описания
-	(description)) ; Описание. Нужно для проверки
+        (line-number) ; Номер строки, куда надо вставлять docstring
+        (lines-construct) ; Регион для удаления существующего описания
+        (description)) ; Описание. Нужно для проверки
 
     ;; Если data == nil
     (if (not data)
-	(message (concat "Не найдена ни одна конструкция Python или была допущена ошибка в коде"))
+        (message (concat "Не найдена ни одна конструкция Python или была допущена ошибка в коде"))
       ;; Если ошибка в коде
       (if (not (nth 0 data))
-	  (message "Python Error: %s" (nth 1 data))
-	;; Если line-number == nil
-	(setq line-number (nth 2 data))
-	(setq lines-construct (nth 3 data))
-	(if (not line-number)
-	    (message (concat "Не найдена ни одна конструкция Python"))
-	  ;; Если все норм
-	  (setq description (nth 1 (nth 4 data)))
-	  
-	  (save-excursion
-	    ;; Переходим к началу конструкции
-	    (with-no-warnings
-	      (goto-line line-number))
+          (message "Python Error: %s" (nth 1 data))
+        ;; Если line-number == nil
+        (setq line-number (nth 2 data))
+        (setq lines-construct (nth 3 data))
+        (if (not line-number)
+            (message (concat "Не найдена ни одна конструкция Python"))
+          ;; Если все норм
+          (setq description (nth 1 (nth 4 data)))
 
-	    ;; Если есть описание, то удаляем его
-	    (when (stringp description)
-	      (setq description (string-trim description))
-	      (when lines-construct
-		(setq lines-construct (number-sequence (nth 0 lines-construct) (nth 1 lines-construct)))
+          (save-excursion
+            ;; Переходим к началу конструкции
+            (with-no-warnings
+              (goto-line line-number))
 
-		(dolist (number lines-construct)
-		  (kill-whole-line))
-		))
+            ;; Если есть описание, то удаляем его
+            (when (stringp description)
+              (setq description (string-trim description))
+              (when lines-construct
+                (setq lines-construct (number-sequence (nth 0 lines-construct) (nth 1 lines-construct)))
 
-	    ;; Вставляем docstring
-	    (pysphinx-put-template-construction->str data)
-	    )
-	  )))))
+                (dolist (number lines-construct)
+                  (kill-whole-line))
+                ))
+            ;; Вставляем docstring
+            (pysphinx-put-template-construction->str data)
+            )
+          )))))
 
 (defvar pysphinx-minor-mode-map
   (let ((map (make-sparse-keymap)))

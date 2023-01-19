@@ -31,7 +31,7 @@ def _get_docstring_line(filepath: _path,
     :param filepath: ``_path``
       .. Путь до файла с конструкцией;
 
-    :param construction: ``Union[ast.ClassDef, ast.Functiondef]``
+    :param construction: ``Union[ast.ClassDef, ast.Functiondef, ast.AsyncFunctionDef]``
       .. Ast объект конструкции;
 
 
@@ -42,50 +42,23 @@ def _get_docstring_line(filepath: _path,
     with open(filepath) as f:
         segment = StringIO(ast.get_source_segment(f.read(), construction, padded=False))
 
-    # Это значение вернеться из фукнции
-    res_line_number = 0
+    unparsed_construction = ast.unparse(construction).split("\n")[0].replace(" ", "")
 
-    line = 0  # Номер строки
-
-    prev_token = None  # Предыдущий символ, кроме
-
-    # Эти символы пропускаем (нужно для prev_token)
-    skip_chars = (" ", "\n", "-", ">", "]", "[", "->")
-
-    # Объявил, чтобы в цикле не спамить isinstance
-    is_function = isinstance(construction, ast.FunctionDef)
-    is_class = isinstance(construction, ast.ClassDef)
+    prev_results = []
+    results_line = ""
 
     for token in tokenize.generate_tokens(segment.readline):
-        # Пропускаем строку, если сначала
-        # был найден комментарий (знак перед выражением "#")
-        if token.start[0] > line:
-            if token.string == "#":
-                line = token.start[0]
+        if token.start[0] > 0:
+            trimmed_line = token.line.strip().replace(" ", "")
+            if trimmed_line in unparsed_construction:
+                if trimmed_line not in prev_results:
+                    results_line += trimmed_line
+                    prev_results.append(trimmed_line)
 
-            # Пропустить если токен не является
-            # знаком припинания
-            if token.string in skip_chars \
-               or token.string.isalpha() \
-               or token.string.replace(".", "").isdigit() \
-               or not token.string.strip():
-                continue
+            if results_line == unparsed_construction.replace(" ", ""):
+                return construction.lineno + len(prev_results)
 
-            # Для функции и класса разные условия
-            # Если найдена строка, то прерываем цикл
-            if is_function:
-                if prev_token:
-                    if token.string == ":" and prev_token == ")":
-                        res_line_number = token.start[0]
-                        break
-            elif is_class:
-                if token.string == ":":
-                    res_line_number = token.start[0]
-                    break
-
-            prev_token = token.string
-
-    return construction.lineno + res_line_number
+    return construction.lineno
 
 
 def _parse_entry(module,
@@ -126,7 +99,7 @@ def _parse_entry(module,
     near_line = int(near_line)
     level = int(level)
 
-    construction_types = (ast.FunctionDef, ast.ClassDef)
+    construction_types = (ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef)
     message = "Код пуст или не найдено ближайших конструкций \"_parse_entry\""
 
     type_construction = None
@@ -231,6 +204,7 @@ def _parse_construct(
     else:
         return construct
 
+
     returns = "None"  # Типизация функции (что она возвращает)
     description = None  # Описание (если оно есть)
     arguments = []  # Аргументы
@@ -268,26 +242,28 @@ def _parse_construct(
                     else:
                         description = unparsed
 
-    if isinstance(construct, ast.FunctionDef):
-        # Тип конструкции (функция, класс, метод...)
+    def detect_function(type_construction, async_function = False):
+        async_function = "async-" if async_function else ""
         if construct.decorator_list:
             declist = construct.decorator_list
             if isinstance(declist[0], ast.Name):
                 if declist[0].id == "staticmethod":
-                    type_construction = "static-method"
+                    type_construction = f"{async_function}static-method"
                 elif declist[0].id == "classmethod":
-                    type_construction = "class-method"
+                    type_construction = f"{async_function}class-method"
                 elif declist[0].id == "abstractmethod":
-                    type_construction = "abstract-method"
+                    type_construction = f"{async_function}abstract-method"
                 elif declist[0].id == "abstractproperty":
-                    type_construction = "abstract-property-method"
+                    type_construction = f"{async_function}abstract-property-method"
                 elif type_construction == "method":
-                    type_construction = "decorated-method"
+                    type_construction = f"{async_function}decorated-method"
                 else:
-                    type_construction = "decorated-function"
+                    type_construction = f"{async_function}decorated-function"
+        elif type_construction == "method":
+            type_construction = f"{async_function}{type_construction}"
         else:
             if not type_construction:
-                type_construction = "function"
+                type_construction = f"{async_function}function"
 
         # Типизация возвращения (если не None, то str название, иначе None)
         returns = ast.unparse(construct.returns) if construct.returns else "None"
@@ -308,18 +284,38 @@ def _parse_construct(
                 annotation,
                 default_value
             ])
+
+        return type_construction
+
+    if isinstance(construct, ast.FunctionDef):
+        type_construction = detect_function(type_construction)
+        # Тип конструкции (функция, класс, метод...)
+    elif isinstance(construct, ast.AsyncFunctionDef):
+        type_construction = detect_function(type_construction, True)
     elif isinstance(construct, ast.ClassDef):
         # Тип конструкции (функция, класс, метод...)
         names_abstract = ("ABC", "ABCMeta", "abc.ABC", "abc.ABCMeta")
         names_interface = ("zope.interface.Interface", "Interface", "interface.Interface")
 
+        async_class = ""
+        if len(construct.body) > 0:
+            for arg in construct.body:
+                if (isinstance(arg, ast.AsyncFunctionDef) and arg.name == "__init__"):
+                    async_class = "async-"
+                    break
+
+
+        decorated_class = ""
+        if construct.decorator_list:
+            decorated_class = "decorated-"
+
         if construct.bases:
             baseslist = construct.bases
             if isinstance(baseslist[0], ast.Name):
                 if baseslist[0].id in names_abstract:
-                    type_construction = "abstract-class"
+                    type_construction = f"{async_class}{decorated_class}abstract-class"
                 elif baseslist[0].id in names_interface:
-                    type_construction = "interface"
+                    type_construction = f"{async_class}{decorated_class}interface"
 
             if not type_construction:
                 type_construction = "inheritance-class"
@@ -327,21 +323,21 @@ def _parse_construct(
             keywords = construct.keywords
             if isinstance(keywords[0].value, ast.Name):
                 if keywords[0].value.id in names_abstract:
-                    type_construction = "abstract-class"
+                    type_construction = f"{async_class}{decorated_class}abstract-class"
                 elif keywords[0].value.id in names_interface:
-                    type_construction = "interface"
+                    type_construction = f"{async_class}{decorated_class}interface"
 
             if not type_construction:
-                type_construction = "inheritance-class"
+                type_construction = f"{async_class}{decorated_class}inheritance-class"
         elif len(construct.body) > 1:
             for arg in construct.body:
                 if isinstance(arg, ast.Assign) and isinstance(arg.targets[0], ast.Name) and isinstance(arg.value, ast.Name):
                     if arg.targets[0].id == "__metaclass__":
                         if arg.value.id in names_abstract:
-                            type_construction = "abstract-class"
+                            type_construction = f"{async_class}{decorated_class}abstract-class"
 
         if not type_construction:
-            type_construction = "class"
+            type_construction = f"{async_class}{decorated_class}class"
 
         # Типизация возвращения
         returns = construct.name
