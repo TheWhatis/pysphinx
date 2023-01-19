@@ -8,3 +8,4 @@ lib*
 /__pycache__
 pyvenv.cfg
 test.py
+.mypy_cache
