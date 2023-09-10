@@ -14,6 +14,8 @@ from typing import Any
 
 from io import StringIO
 
+from pprint import pprint
+
 _path = str
 _ast_body = list
 
@@ -265,9 +267,6 @@ def _parse_construct(
             if not type_construction:
                 type_construction = f"{async_function}function"
 
-        # Типизация возвращения (если не None, то str название, иначе None)
-        returns = ast.unparse(construct.returns) if construct.returns else "None"
-
         len_args = len(construct.args.args)
         len_defaults = len(construct.args.defaults)
 
@@ -289,9 +288,15 @@ def _parse_construct(
 
     if isinstance(construct, ast.FunctionDef):
         type_construction = detect_function(type_construction)
+        # Типизация возвращения (если не None, то str название, иначе None)
+        returns = ast.unparse(construct.returns) if construct.returns else "None"
+
         # Тип конструкции (функция, класс, метод...)
     elif isinstance(construct, ast.AsyncFunctionDef):
         type_construction = detect_function(type_construction, True)
+        # Типизация возвращения (если не None, то str название, иначе None)
+        returns = ast.unparse(construct.returns) if construct.returns else "None"
+
     elif isinstance(construct, ast.ClassDef):
         # Тип конструкции (функция, класс, метод...)
         names_abstract = ("ABC", "ABCMeta", "abc.ABC", "abc.ABCMeta")
@@ -398,3 +403,5 @@ def print_construct(code: Union[str, _path],
     print(
         json.dumps(printmessage, ensure_ascii=False)
     )
+
+pprint(_parse_construct("/home/whatis/Projects/Programming/python/Learn/Testing/main.py", 3))
