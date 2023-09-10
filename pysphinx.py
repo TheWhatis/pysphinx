@@ -15,6 +15,7 @@ from typing import Any
 
 from io import StringIO
 
+
 _path = str
 _ast_body = list
 
