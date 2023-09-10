@@ -43,17 +43,7 @@
 ;; Шаблоны
 (defvar pysphinx-template-header-levels)
 
-(let ((header-1 "=")
-      (header-2 "-")
-      (header-3 "~")
-      (header-4 "^"))
-  (setq pysphinx-template-header-levels (list))
-  (push header-4 pysphinx-template-header-levels)
-  (push header-3 pysphinx-template-header-levels)
-  (push header-2 pysphinx-template-header-levels)
-  (push header-1 pysphinx-template-header-levels))
-
-(defconst pysphinx-template-header "{header};")
+(defconst pysphinx-template-header "{header};\n")
 
 (defconst pysphinx-template-description
   (concat ".. This is multistring" "\n"
@@ -153,19 +143,12 @@
           "{returns}"))
 
 
-(defun pysphinx-generate-template-header->str (header level)
+(defun pysphinx-generate-template-header->str (header)
   "Создание заголовка для шаблона.
 HEADER - текст заголовка
 LEVEL - уровень вложенности"
-  (unless (<= 0 level 3)
-    (setq level 3))
-  (let ((char (nth level pysphinx-template-header-levels))
-        (header (replace-regexp-in-string "{header}" header pysphinx-template-header)))
-    (when (stringp char)
-      (setq char (string-to-char char)))
-    (setq header
-          (concat header "\n" (make-string (length header) char)))
-    header))
+  (setq header (replace-regexp-in-string "{header}" header pysphinx-template-header))
+  header)
 
 
 (defun pysphinx-generate-template-description->str ()
@@ -224,7 +207,7 @@ PATH - путь до нее"
 (pysphinx-create-directory-if-not-exists "~/.emacs.d/pysphinx/temp")
 
 ;; Генерация шаблонов для конструкций
-(defun pysphinx-generate-template->str (type level header arguments returns)
+(defun pysphinx-generate-template->str (type header arguments returns)
   "Генерация шаблона функции.
 TYPE - тип конструкции
 LEVEL - уровень вложенности
@@ -271,7 +254,7 @@ RETURNS - текст типа возвращенных данных"
       ;; Обрабатываем заголовок
       (when (not header)
         (setq header (concat "This is " type " header")))
-      (setq header (pysphinx-generate-template-header->str header level))
+      (setq header (pysphinx-generate-template-header->str header))
 
       ;; Обрабатываем аргументы
       (if arguments
@@ -296,7 +279,6 @@ RETURNS - текст типа возвращенных данных"
 DATA - данные конструкции"
   (let ((result)
         (indent)
-        (level (nth 0 data))
         (type (nth 1 data))
         (returns (nth 0 (nth 4 data)))
         (description (nth 1 (nth 4 data)))
@@ -316,13 +298,13 @@ DATA - данные конструкции"
 
       ;; Для обычных функций
       (if (stringp type)
-          (setq result (pysphinx-generate-template->str type level description arguments returns))
-        (setq result (pysphinx-generate-template->str "function" level description arguments returns)))
+          (setq result (pysphinx-generate-template->str type description arguments returns))
+        (setq result (pysphinx-generate-template->str "function" description arguments returns)))
 
 
       ;; Для когда не была определена конструкция
       (when (not result)
-        (setq result (pysphinx-generate-template->str "function" level description arguments returns)))
+        (setq result (pysphinx-generate-template->str "function" description arguments returns)))
 
       ;; Добавляем табуляцию
       (when result
