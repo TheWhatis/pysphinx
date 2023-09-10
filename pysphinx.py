@@ -5,6 +5,7 @@
 """
 
 import os
+import re
 import ast
 import json
 import tokenize
@@ -14,50 +15,107 @@ from typing import Any
 
 from io import StringIO
 
-from pprint import pprint
-
 _path = str
 _ast_body = list
 
 
-def _get_docstring_line(filepath: _path,
-                        construction: Union[ast.ClassDef, ast.FunctionDef]
-                        ) -> int:
+def _get_docstring_line(
+        filepath: _path,
+        construction: Union[ast.ClassDef, ast.FunctionDef]
+) -> int:
     """
     Получить номер строки, куда вставить docstring;
     -----------------------------------------------
-    .. Получает на вход объект конструкции ast и путь до файла .py где она находиться, и
-       возвращает номер строки, где нужно вставлять docstring
+    .. Получает на вход объект конструкции
+       ast и путь до файла .py где она находиться,
+       и возвращает номер строки, где нужно
+       вставлять docstring
 
 
     :param filepath: ``_path``
-      .. Путь до файла с конструкцией;
+        .. Путь до файла с конструкцией;
 
-    :param construction: ``Union[ast.ClassDef, ast.Functiondef, ast.AsyncFunctionDef]``
-      .. Ast объект конструкции;
+    :param construction: ``Union[
+               ast.ClassDef,
+               ast.Functiondef,
+               ast.AsyncFunctionDef
+           ]``
+        .. Ast объект конструкции;
 
 
     :returns: ``int``
-    .. Возвращает номер строки;
+        .. Возвращает номер строки;
     """
     # Получаем сегмент кода для парсинга
     with open(filepath) as f:
-        segment = StringIO(ast.get_source_segment(f.read(), construction, padded=False))
+        segment = StringIO(
+            ast.get_source_segment(
+                f.read(),
+                construction,
+                padded=False
+            )
+        )
 
-    unparsed_construction = ast.unparse(construction).split("\n")[0].replace(" ", "")
+    # Разбираем переданную конструкцию
+    unparsed_construction = ast.unparse(construction).split("\n");
 
-    prev_results = []
-    results_line = ""
+    # Перебираем её элементы (игнорируем декораторы)
+    for index, line in enumerate(unparsed_construction):
+        if line[0] != '@':
+            # Поскольку драный ast не сохраняет
+            # целостность конструкции, а именно,
+            # меняет одинарные ковычки на двойные и
+            # наоборот, удаляет комментарии и т.д.
+            # приходиться адаптировать разобранные
+            # и полученные строки к одному формату
+            unparsed_construction = line\
+                .replace(" ", "")\
+                .replace('"', "'");
+            break;
 
+    prev_results = [] # Предыдущие совпадения
+    results_line = "" # "Результативная" собранная строка
+
+    # Перебираем "токены"
     for token in tokenize.generate_tokens(segment.readline):
         if token.start[0] > 0:
-            trimmed_line = token.line.strip().replace(" ", "")
-            if trimmed_line in unparsed_construction:
-                if trimmed_line not in prev_results:
-                    results_line += trimmed_line
-                    prev_results.append(trimmed_line)
+            # Поскольку драный ast не сохраняет
+            # целостность конструкции, а именно,
+            # меняет одинарные ковычки на двойные и
+            # наоборот, удаляет комментарии и т.д.
+            # приходиться адаптировать разобранные
+            # и полученные строки к одному формату
+            trimmed_line = token.line.strip()\
+                    .replace(" ", "")\
+                    .replace('"', "'")
+            trimmed_line = re.sub(r'#.*', '', trimmed_line)
 
-            if results_line == unparsed_construction.replace(" ", ""):
+            # Если не пустая строка
+            if trimmed_line:
+                # Считаем совпадения и
+                # генерируем идентичную строку
+                res = None;
+
+                # Одно лишнее условие по вышеописанной
+                # проблеме
+                if trimmed_line in unparsed_construction:
+                    if trimmed_line not in prev_results:
+                        res = trimmed_line;
+                elif trimmed_line.replace('():', ':') in unparsed_construction:
+                    if trimmed_line not in prev_results:
+                        res = trimmed_line.replace('():', ':');
+
+                # Если найдено совпадение, то
+                # запоминаем его
+                if res:
+                    results_line += res
+                    prev_results.append(res)
+
+            # Если собранная строка совпадает
+            # с переданной, разобранной выше, то
+            # вычисляем корректное местоположение
+            # строки документации и выдаем его (номер строки)
+            if results_line == unparsed_construction:
                 return construction.lineno + len(prev_results)
 
     return construction.lineno
@@ -71,8 +129,9 @@ def _parse_entry(module,
     """
     Функция для получения конструкции (рекурсивная);
     ------------------------------------------------
-    .. Получает на вход тело файла/текст, где находиться конструкция и
-       возращает её и её вложенность;
+    .. Получает на вход тело файла/текст, где
+       находиться конструкция и возращает её
+       и её вложенность;
 
 
     :param module: ``module ast from parse`` - default: None
@@ -137,7 +196,12 @@ def _parse_construct(
     Распарсить переданную конструкцию python;
     -----------------------------------------
     .. Получает на вход текст кода (или путь до файла с кодом) и
-       возвращает разобранную конструкцию в виде ``[Уровень вложенности, "Тип конструкции", ["тип returns", "описание", [аргументы...]]]``
+       возвращает разобранную конструкцию в виде
+       ``[
+            Уровень вложенности,
+            "Тип конструкции",
+            ["тип returns", "описание", [аргументы...]]
+       ]``
 
        Но если была передана конструкция, в которой допущена ошибка, то
        вернет текст ошибки;
@@ -403,5 +467,3 @@ def print_construct(code: Union[str, _path],
     print(
         json.dumps(printmessage, ensure_ascii=False)
     )
-
-pprint(_parse_construct("/home/whatis/Projects/Programming/python/Learn/Testing/main.py", 3))
