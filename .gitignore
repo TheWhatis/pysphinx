@@ -9,3 +9,8 @@ lib*
 pyvenv.cfg
 test.py
 .mypy_cache
+ast
+tokenize
+os
+json
+
