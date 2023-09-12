@@ -142,6 +142,12 @@
           "{arguments}"
           "{returns}"))
 
+(defconst pysphinx-template-module
+  (concat "{header}" "\n"
+          "{description}"
+          "{arguments}"
+          "{returns}"))
+
 
 (defun pysphinx-generate-template-header->str (header)
   "Создание заголовка для шаблона.
@@ -216,6 +222,9 @@ ARGUMENTS - список аргументов либо nil
 RETURNS - текст типа возвращенных данных"
   (let ((result)
         (description pysphinx-template-description))
+
+    (when (string-match "module" type)
+      (setq result pysphinx-template-module))
 
     (when (string-match "function" type)
       (setq result pysphinx-template-function))
@@ -376,7 +385,7 @@ TEMPLATE - Текст шаблона"
   (let ((result)
         (indent) ; Табуляция
         (spl-template (split-string template "\n"))) ; Разделяем шаблон по строкам
-    
+
     ;; Получаем правильную табуляцию
     (dolist (idex (number-sequence 1 (* python-indent-offset level)))
       (setq indent (concat indent " ")))
@@ -394,7 +403,7 @@ TEMPLATE - Текст шаблона"
 DATA - данные конструкции"
   (let ((template (pysphinx-generate-template-construction->str data))
         (level (nth 0 data)))
-    
+
     (when template
       (setq template
             (pysphinx-prepare-template-before-put->str level (concat "\"\"\"" "\n"
