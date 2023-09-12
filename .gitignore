@@ -5,7 +5,7 @@ python-sphinx-doc.el.old
 /bin
 lib*
 .pyvenv
-/__pycache__
+__pycache__
 pyvenv.cfg
 test.py
 .mypy_cache

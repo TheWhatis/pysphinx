@@ -1,8 +1,5 @@
-"""
-Вспомогательный модуль для скрипта;
-===================================
-.. Содержит функции для парсинга конструкций языка python
-"""
+"""Вспомогательный модуль для скрипта
+Содержит функции для парсинга конструкций языка python"""
 
 import os
 import re
@@ -14,7 +11,6 @@ from typing import Union
 from typing import Any
 
 from io import StringIO
-
 
 _path = str
 _ast_body = list
@@ -117,6 +113,9 @@ def _get_docstring_line(
             # вычисляем корректное местоположение
             # строки документации и выдаем его (номер строки)
             if results_line == unparsed_construction:
+                if isinstance(construction.body[0], ast.Expr):
+                    return construction.body[0].lineno
+
                 return construction.lineno + len(prev_results)
 
     return construction.lineno
@@ -263,14 +262,24 @@ def _parse_construct(
     # Рекурсивно перебирая все элементы получаем нужный
     result_entry = _parse_entry(module, line)
 
-    # Проверяем что получили
-    if result_entry[0]:
-        level = result_entry[0]
-        type_construction = result_entry[2]  # Тип конструкции (функция, класс, метод)
-        construct = result_entry[1]
-    else:
-        return construct
+    # Если конструкции не найдены
+    # то необходимо писать документацию
+    # для модуля
+    if not result_entry[0]:
+        expr = module.body[0];
+        lines, description = (
+            [expr.lineno, expr.end_lineno] if isinstance(expr, ast.Expr) else None,
+            ast.unparse(expr) if isinstance(expr, ast.Expr) else None
+        )
+        return [
+            0, 'module', 0, lines, [
+                code.split('/')[-1], description, []
+            ]
+        ];
 
+    level = result_entry[0]
+    type_construction = result_entry[2]  # Тип конструкции (функция, класс, метод)
+    construct = result_entry[1]
 
     returns = "None"  # Типизация функции (что она возвращает)
     description = None  # Описание (если оно есть)
@@ -452,12 +461,19 @@ def _parse_construct(
     ]
 
 
-def print_construct(code: Union[str, _path],
-                    line: int
-                    ):
+def print_construct(
+        code: Union[str, _path],
+        line: int
+):
     """
     Вывести в stdout результат работы parse_construct;
-    --------------------------------------------------
+
+    :param code: ``Union[str, _path]``
+        .. Либо строку кода, либо путь до файла
+           с кодом
+
+    :param line: ``int``
+        .. На какой линии находятся курсор
     """
     try:
         printmessage = _parse_construct(code, line)
@@ -466,5 +482,8 @@ def print_construct(code: Union[str, _path],
         printmessage = [err, [err]]
 
     print(
-        json.dumps(printmessage, ensure_ascii=False)
+        json.dumps(
+            printmessage,
+            ensure_ascii=False
+        )
     )
